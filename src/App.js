@@ -1,11 +1,20 @@
 import React, { Component } from 'react';
 import './App.css';
 
+import BodyTracker from './components/BodyTracker';
+
 class App extends Component {
 	render() {
 		return (
 			<div className="App">
-				<p>This is Fat Tracker</p>
+				<div className="navbar">
+					<div className="navbar-brand">
+						<div className="navbar-item">Entry</div>
+						<div className="navbar-item">Progress</div>
+						<div className="navbar-item">History</div>
+					</div>
+				</div>
+				<BodyTracker />
 			</div>
 		);
 	}
