@@ -1,5 +1,5 @@
 {
-	"name": "fattracker",
+	"name": "bodytracker",
 	"version": "0.1.0",
 	"private": true,
 	"dependencies": {
@@ -22,6 +22,10 @@
 		"start": "react-scripts start",
 		"build": "react-scripts build",
 		"test": "react-scripts test --env=jsdom",
-		"eject": "react-scripts eject"
+		"eject": "react-scripts eject",
+		"deploy":
+			"yarn build && ssh root@tweeres.ca 'rm -r /var/www/bodytracker'; scp -r build root@tweeres.ca:/var/www/bodytracker",
+		"deployconfig":
+			"scp etc/bodytracker root@tweeres.ca:/etc/nginx/sites-available && ssh root@tweeres.ca 'nginx -s reload'"
 	}
 }

@@ -1,0 +1,20 @@
+include /etc/nginx/expiresmap.conf;
+
+server {
+	server_name bodytracker.tweeres.ca;
+	return 301 https://$host$request_uri;
+}
+
+server {
+	gzip on;
+	listen 443 ssl http2;
+	server_name bodytracker.tweeres.ca;
+	root /var/www/bodytracker;
+	ssl_certificate /etc/letsencrypt/live/bodytracker.tweeres.ca/fullchain.pem;
+	ssl_certificate_key /etc/letsencrypt/live/bodytracker.tweeres.ca/privkey.pem;
+	expires $expires;
+
+	location /service-worker.js {
+		expires epoch;
+	}
+}
