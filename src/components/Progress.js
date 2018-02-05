@@ -25,6 +25,7 @@ class Chart extends Component {
 		const querySnapshot = await firebase
 			.firestore()
 			.collection(`users/${uid}/entries`)
+			.orderBy('timestamp', 'desc')
 			.get();
 		const entries = querySnapshot.docs.map(ds => ds.data());
 		const times = entries.map(e => e.timestamp.toDateString());

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 import firebase from 'firebase/app';
+import update from 'immutability-helper';
 
 import _pickBy from 'lodash/fp/pickBy';
 import _toNumber from 'lodash/fp/toNumber';
@@ -17,14 +18,38 @@ function entryData(entry) {
 	return result;
 }
 
+function entryFormFactory() {
+	return {
+		weight: '',
+		waist: '',
+		bf: ''
+	};
+}
+
+function BodyTrackerField({ label, name, value, handleChange }) {
+	return (
+		<div className="field">
+			<label htmlFor="" className="label">
+				{label}
+			</label>
+			<div className="control">
+				<input
+					type="number"
+					className="input"
+					name={name}
+					placeholder="Your current weight"
+					value={value}
+					onChange={handleChange}
+				/>
+			</div>
+		</div>
+	);
+}
+
 export default class BodyTracker extends Component {
 	state = {
 		user: null,
-		entry: {
-			weight: '',
-			waist: '',
-			bf: ''
-		}
+		entry: entryFormFactory()
 	};
 	componentDidMount() {
 		firebase.auth().onAuthStateChanged(user => {
@@ -33,6 +58,7 @@ export default class BodyTracker extends Component {
 	}
 	render() {
 		const { user, entry: { weight, waist, bf } } = this.state;
+
 		return (
 			user && (
 				<section className="section">
@@ -40,51 +66,24 @@ export default class BodyTracker extends Component {
 						<div className="columns">
 							<div className="column">
 								<h1 className="title">Body Tracker</h1>
-								<div className="field">
-									<label htmlFor="" className="label">
-										Weight
-									</label>
-									<div className="control">
-										<input
-											type="number"
-											className="input"
-											name="weight"
-											placeholder="Your current weight"
-											value={weight}
-											onChange={this.handleInputChange}
-										/>
-									</div>
-								</div>
-								<div className="field">
-									<label htmlFor="" className="label">
-										Waist
-									</label>
-									<div className="control">
-										<input
-											type="number"
-											className="input"
-											name="waist"
-											placeholder="Your waist circumference"
-											value={waist}
-											onChange={this.handleInputChange}
-										/>
-									</div>
-								</div>
-								<div className="field">
-									<label htmlFor="" className="label">
-										Bodyfat percentage
-									</label>
-									<div className="control">
-										<input
-											type="number"
-											className="input"
-											name="bf"
-											placeholder="Your bodyfat percentage"
-											value={bf}
-											onChange={this.handleInputChange}
-										/>
-									</div>
-								</div>
+								<BodyTrackerField
+									label="Weight"
+									name="weight"
+									value={weight}
+									handleChange={this.handleInputChange}
+								/>
+								<BodyTrackerField
+									label="Waist"
+									name="waist"
+									value={waist}
+									handleChange={this.handleInputChange}
+								/>
+								<BodyTrackerField
+									label="Bodyfat Percentage"
+									name="bf"
+									value={bf}
+									handleChange={this.handleInputChange}
+								/>
 							</div>
 						</div>
 						<div className="columns">
@@ -103,10 +102,11 @@ export default class BodyTracker extends Component {
 		);
 	}
 	handleInputChange = ({ target: { name, value } }) => {
-		if (['weight', 'waist', 'bf'].some(f => f == name)) {
-			value = value == '' ? value : _toNumber(value);
-		}
-		this.setState({ [name]: value });
+		value = value == '' ? value : _toNumber(value);
+		const statePatch = update(this.state, {
+			entry: { [name]: { $set: value } }
+		});
+		this.setState(statePatch);
 	};
 	handleSubmit = async () => {
 		const entry = entryData(this.state.entry);
@@ -121,7 +121,7 @@ export default class BodyTracker extends Component {
 				.catch(err => {
 					console.error(err);
 				});
-			console.log('Added ', entry);
+			this.setState(() => ({ entry: entryFormFactory() }));
 		}
 	};
 }
