@@ -3,10 +3,17 @@ import Chartjs from 'chart.js';
 import firebase from 'firebase/app';
 
 const colours = [
-	'hsl(217, 71%, 53%)',
-	'hsl(348, 100%, 61%)',
-	'hsl(48, 100%, 67%)',
-	'hsl(141, 71%, 48%)'
+	'rgb(50,115,220)',
+	'rgb(255,56,96)',
+	'rgb(255,221,87)',
+	'rgb(35,209,96)'
+];
+
+const backgroundColours = [
+	'rgba(50,115,220, 0.2)',
+	'rgba(255,56,96, 0.2)',
+	'rgba(255,221,87, 0.2)',
+	'rgba(35,209,96, 0.2)'
 ];
 
 class Chart extends Component {
@@ -41,19 +48,19 @@ class Chart extends Component {
 						label: 'Weight',
 						data: weight,
 						borderColor: colours[0],
-						backgroundColor: 'rgba(0,0,0,0)'
+						backgroundColor: backgroundColours[0]
 					},
 					{
 						label: 'Waist',
 						data: waist,
 						borderColor: colours[1],
-						backgroundColor: 'rgba(0,0,0,0)'
+						backgroundColor: backgroundColours[1]
 					},
 					{
 						label: 'Bodyfat %',
 						data: bf,
 						borderColor: colours[2],
-						backgroundColor: 'rgba(0,0,0,0)'
+						backgroundColor: backgroundColours[2]
 					}
 				]
 			}

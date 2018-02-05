@@ -41,6 +41,11 @@ export default class History extends Component {
 						>
 							{entrylistItems}
 						</Infinite>
+						{entries.length < 1 && (
+							<div className="box">
+								No entries yet. Add one to get started.
+							</div>
+						)}
 					</div>
 				</section>
 			)
