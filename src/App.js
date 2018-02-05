@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import './App.css';
 
-import BodyTracker from './components/BodyTracker';
+// import BodyTracker from './components/BodyTracker';
+import Progress from './components/Progress';
 
 class App extends Component {
 	render() {
@@ -14,7 +15,8 @@ class App extends Component {
 						<div className="navbar-item">History</div>
 					</div>
 				</div>
-				<BodyTracker />
+				{/* <BodyTracker /> */}
+				<Progress />
 			</div>
 		);
 	}
