@@ -26,6 +26,27 @@ function entryFormFactory() {
 	};
 }
 
+function EntrySuccessNotification({ active }) {
+	return (
+		active && (
+			<div
+				style={{
+					position: 'absolute',
+					left: 0,
+					bottom: 0,
+					width: '100%'
+				}}
+			>
+				<div className="container">
+					<div className="notification is-success has-text-centered">
+						New entry added
+					</div>
+				</div>
+			</div>
+		)
+	);
+}
+
 function BodyTrackerField({ label, name, value, handleChange, placeholder }) {
 	return (
 		<div className="field">
@@ -49,7 +70,8 @@ function BodyTrackerField({ label, name, value, handleChange, placeholder }) {
 export default class BodyTracker extends Component {
 	state = {
 		user: null,
-		entry: entryFormFactory()
+		entry: entryFormFactory(),
+		successNotification: false
 	};
 	componentDidMount() {
 		firebase.auth().onAuthStateChanged(user => {
@@ -57,7 +79,11 @@ export default class BodyTracker extends Component {
 		});
 	}
 	render() {
-		const { user, entry: { weight, waist, bf } } = this.state;
+		const {
+			user,
+			entry: { weight, waist, bf },
+			successNotification
+		} = this.state;
 
 		return (
 			user && (
@@ -100,6 +126,7 @@ export default class BodyTracker extends Component {
 							</div>
 						</div>
 					</div>
+					<EntrySuccessNotification active={successNotification} />
 				</section>
 			)
 		);
@@ -115,6 +142,7 @@ export default class BodyTracker extends Component {
 		const entry = entryData(this.state.entry);
 		if (entry) {
 			const { uid } = firebase.auth().currentUser;
+			this.setState({ successNotification: true });
 			await firebase
 				.firestore()
 				.collection('users')
@@ -124,7 +152,15 @@ export default class BodyTracker extends Component {
 				.catch(err => {
 					console.error(err);
 				});
-			this.setState(() => ({ entry: entryFormFactory() }));
+			this.setState(() => ({
+				entry: entryFormFactory()
+			}));
+			this.timeoutHandle = setTimeout(() => {
+				this.setState({ successNotification: false });
+			}, 3000);
 		}
 	};
+	componentWillUnmount() {
+		clearTimeout(this.timeoutHandle);
+	}
 }

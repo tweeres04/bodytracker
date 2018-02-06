@@ -32,39 +32,57 @@ class Chart extends Component {
 		const querySnapshot = await firebase
 			.firestore()
 			.collection(`users/${uid}/entries`)
-			.orderBy('timestamp', 'desc')
+			.orderBy('timestamp')
 			.get();
 		const entries = querySnapshot.docs.map(ds => ds.data());
 		const times = entries.map(e => e.timestamp.toDateString());
 		const weight = entries.map(e => e.weight);
 		const waist = entries.map(e => e.waist);
 		const bf = entries.map(e => e.bf);
-		new Chartjs(this.element, {
-			type: 'line',
-			data: {
-				labels: times,
-				datasets: [
-					{
-						label: 'Weight',
-						data: weight,
-						borderColor: colours[0],
-						backgroundColor: backgroundColours[0]
-					},
-					{
-						label: 'Waist',
-						data: waist,
-						borderColor: colours[1],
-						backgroundColor: backgroundColours[1]
-					},
-					{
-						label: 'Bodyfat %',
-						data: bf,
-						borderColor: colours[2],
-						backgroundColor: backgroundColours[2]
+		this.element &&
+			new Chartjs(this.element, {
+				type: 'line',
+				data: {
+					labels: times,
+					datasets: [
+						{
+							label: 'Weight',
+							data: weight,
+							borderColor: colours[0],
+							backgroundColor: backgroundColours[0],
+							yAxisID: 'weight-axis'
+						},
+						{
+							label: 'Waist',
+							data: waist,
+							borderColor: colours[1],
+							backgroundColor: backgroundColours[1],
+							yAxisID: 'waist-bf-axis'
+						},
+						{
+							label: 'Bodyfat %',
+							data: bf,
+							borderColor: colours[2],
+							backgroundColor: backgroundColours[2],
+							yAxisID: 'waist-bf-axis'
+						}
+					]
+				},
+				options: {
+					scales: {
+						yAxes: [
+							{
+								id: 'weight-axis'
+							},
+							{
+								id: 'waist-bf-axis',
+								position: 'right'
+								// type: 'linear'
+							}
+						]
 					}
-				]
-			}
-		});
+				}
+			});
 	}
 	render() {
 		return (
