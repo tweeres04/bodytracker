@@ -26,7 +26,7 @@ function entryFormFactory() {
 	};
 }
 
-function BodyTrackerField({ label, name, value, handleChange }) {
+function BodyTrackerField({ label, name, value, handleChange, placeholder }) {
 	return (
 		<div className="field">
 			<label htmlFor="" className="label">
@@ -37,7 +37,7 @@ function BodyTrackerField({ label, name, value, handleChange }) {
 					type="number"
 					className="input"
 					name={name}
-					placeholder="Your current weight"
+					placeholder={placeholder}
 					value={value}
 					onChange={handleChange}
 				/>
@@ -71,18 +71,21 @@ export default class BodyTracker extends Component {
 									name="weight"
 									value={weight}
 									handleChange={this.handleInputChange}
+									placeholder="Your current weight"
 								/>
 								<BodyTrackerField
 									label="Waist"
 									name="waist"
 									value={waist}
 									handleChange={this.handleInputChange}
+									placeholder="Your current waist"
 								/>
 								<BodyTrackerField
 									label="Bodyfat Percentage"
 									name="bf"
 									value={bf}
 									handleChange={this.handleInputChange}
+									placeholder="Your current bodyfat percentage"
 								/>
 							</div>
 						</div>
