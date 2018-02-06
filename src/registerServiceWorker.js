@@ -1,3 +1,25 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+function NewContentNotification() {
+	return (
+		<div
+			style={{
+				position: 'fixed',
+				bottom: 0,
+				cursor: 'pointer',
+				width: '100%'
+			}}
+			className="notification is-info"
+			onClick={() => {
+				window.location.reload();
+			}}
+		>
+			A new version of Bodytracker is available. Tap here to refresh.
+		</div>
+	);
+}
+
 // In production, we register a service worker to serve assets from local cache.
 
 // This lets the app load faster on subsequent visits in production, and gives
@@ -67,6 +89,10 @@ function registerValidSW(swUrl) {
 							// available; please refresh." message in your web app.
 							console.log(
 								'New content is available; please refresh.'
+							);
+							ReactDOM.render(
+								<NewContentNotification />,
+								document.getElementById('swDiv')
 							);
 						} else {
 							// At this point, everything has been precached.
