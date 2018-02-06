@@ -35,7 +35,7 @@ class Chart extends Component {
 			.orderBy('timestamp')
 			.get();
 		const entries = querySnapshot.docs.map(ds => ds.data());
-		const times = entries.map(e => e.timestamp.toDateString());
+		const times = entries.map(e => e.timestamp);
 		const weight = entries.map(e => e.weight);
 		const waist = entries.map(e => e.waist);
 		const bf = entries.map(e => e.bf);
@@ -70,6 +70,11 @@ class Chart extends Component {
 				},
 				options: {
 					scales: {
+						xAxes: [
+							{
+								type: 'time'
+							}
+						],
 						yAxes: [
 							{
 								id: 'weight-axis'
@@ -77,7 +82,6 @@ class Chart extends Component {
 							{
 								id: 'waist-bf-axis',
 								position: 'right'
-								// type: 'linear'
 							}
 						]
 					}
