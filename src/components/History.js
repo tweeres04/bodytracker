@@ -35,9 +35,8 @@ export default class History extends Component {
 				<section className="section">
 					<div className="container">
 						<Infinite
-							onInfiniteLoad={this.loadEntries}
 							useWindowAsScrollContainer={true}
-							elementHeight={300}
+							elementHeight={136}
 						>
 							{entrylistItems}
 						</Infinite>
@@ -51,26 +50,21 @@ export default class History extends Component {
 			)
 		);
 	}
+	// Need to add paging, seems like there's a bug in firestore for paging on a timestamp
 	loadEntries = async () => {
-		const { entries } = this.state;
 		const { uid } = firebase.auth().currentUser;
 
-		const query = firebase
+		const querySnapshot = await firebase
 			.firestore()
 			.collection(`users/${uid}/entries`)
-			.orderBy('timestamp', 'desc');
-		if (entries) {
-			query.startAfter(entries[entries.length - 1]);
-		}
-		const querySnapshot = await query
+			.orderBy('timestamp', 'desc')
 			.get()
 			.catch(err => console.error(err));
 
-		const newEntries = querySnapshot.docs.map(d =>
+		const entries = querySnapshot.docs.map(d =>
 			Object.assign(d.data(), { id: d.id })
 		);
-		this.setState(({ entries }) => ({
-			entries: (entries || []).concat(newEntries)
-		}));
+		this.lastEntry = querySnapshot.docs[querySnapshot.docs.length - 1];
+		this.setState({ entries });
 	};
 }
