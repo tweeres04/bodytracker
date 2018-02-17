@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 
 import firebase from 'firebase/app';
 import update from 'immutability-helper';
+import classnames from 'classnames';
 
 import _pickBy from 'lodash/fp/pickBy';
 import _toNumber from 'lodash/fp/toNumber';
@@ -20,7 +21,7 @@ function entryData(entry) {
 
 function entryFormFactory() {
 	return {
-		weight: '',
+		weight: 150,
 		waist: '',
 		chest: '',
 		hips: '',
@@ -71,80 +72,88 @@ function BodyTrackerField({ label, name, value, handleChange, placeholder }) {
 
 export default class BodyTracker extends Component {
 	state = {
-		user: null,
 		entry: entryFormFactory(),
-		successNotification: false
+		successNotification: false,
+		submitting: false
 	};
 	componentDidMount() {
-		firebase.auth().onAuthStateChanged(user => {
-			this.setState({ user });
+		this.userPromise = new Promise((resolve, reject) => {
+			firebase.auth().onAuthStateChanged(user => {
+				resolve(user);
+			});
 		});
 	}
 	render() {
 		const {
-			user,
 			entry: { weight, waist, chest, hips, bf },
-			successNotification
+			successNotification,
+			submitting
 		} = this.state;
 
+		const submitButtonClasses = classnames(
+			'button is-large is-fullwidth is-primary',
+			{
+				'is-loading': submitting
+			}
+		);
+
 		return (
-			user && (
-				<section className="section">
-					<div className="container">
-						<div className="columns">
-							<div className="column">
-								<h1 className="title">Body Tracker</h1>
-								<BodyTrackerField
-									label="Weight"
-									name="weight"
-									value={weight}
-									handleChange={this.handleInputChange}
-									placeholder="Your current weight"
-								/>
-								<BodyTrackerField
-									label="Waist"
-									name="waist"
-									value={waist}
-									handleChange={this.handleInputChange}
-									placeholder="Your current waist measurement"
-								/>
-								<BodyTrackerField
-									label="Chest"
-									name="chest"
-									value={chest}
-									handleChange={this.handleInputChange}
-									placeholder="Your current chest measurement"
-								/>
-								<BodyTrackerField
-									label="Hips"
-									name="hips"
-									value={hips}
-									handleChange={this.handleInputChange}
-									placeholder="Your current hips measurement"
-								/>
-								<BodyTrackerField
-									label="Bodyfat Percentage"
-									name="bf"
-									value={bf}
-									handleChange={this.handleInputChange}
-									placeholder="Your current bodyfat percentage"
-								/>
-							</div>
-						</div>
-						<div className="columns">
-							<div className="column">
-								<button
-									className="button is-large is-fullwidth is-primary"
-									onClick={this.handleSubmit}
-								>
-									Submit
-								</button>
-							</div>
+			<section className="section">
+				<div className="container">
+					<div className="columns">
+						<div className="column">
+							<h1 className="title">Body Tracker</h1>
+							<BodyTrackerField
+								label="Weight"
+								name="weight"
+								value={weight}
+								handleChange={this.handleInputChange}
+								placeholder="Your current weight"
+							/>
+							<BodyTrackerField
+								label="Waist"
+								name="waist"
+								value={waist}
+								handleChange={this.handleInputChange}
+								placeholder="Your current waist measurement"
+							/>
+							<BodyTrackerField
+								label="Chest"
+								name="chest"
+								value={chest}
+								handleChange={this.handleInputChange}
+								placeholder="Your current chest measurement"
+							/>
+							<BodyTrackerField
+								label="Hips"
+								name="hips"
+								value={hips}
+								handleChange={this.handleInputChange}
+								placeholder="Your current hips measurement"
+							/>
+							<BodyTrackerField
+								label="Bodyfat Percentage"
+								name="bf"
+								value={bf}
+								handleChange={this.handleInputChange}
+								placeholder="Your current bodyfat percentage"
+							/>
 						</div>
 					</div>
-					<EntrySuccessNotification active={successNotification} />
-				</section>
-			)
+					<div className="columns">
+						<div className="column">
+							<button
+								disabled={submitting}
+								className={submitButtonClasses}
+								onClick={this.handleSubmit}
+							>
+								Submit
+							</button>
+						</div>
+					</div>
+				</div>
+				<EntrySuccessNotification active={successNotification} />
+			</section>
 		);
 	}
 	handleInputChange = ({ target: { name, value } }) => {
@@ -157,8 +166,8 @@ export default class BodyTracker extends Component {
 	handleSubmit = async () => {
 		const entry = entryData(this.state.entry);
 		if (entry) {
-			const { uid } = firebase.auth().currentUser;
-			this.setState({ successNotification: true });
+			this.setState({ submitting: true });
+			const { uid } = await this.userPromise;
 			await firebase
 				.firestore()
 				.collection('users')
@@ -169,7 +178,9 @@ export default class BodyTracker extends Component {
 					console.error(err);
 				});
 			this.setState(() => ({
-				entry: entryFormFactory()
+				entry: entryFormFactory(),
+				successNotification: true,
+				submitting: false
 			}));
 			this.timeoutHandle = setTimeout(() => {
 				this.setState({ successNotification: false });
