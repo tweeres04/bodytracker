@@ -77,6 +77,7 @@ export default class History extends Component {
 		return (
 			<section className="section">
 				<div className="container">
+					<h1 className="title">History</h1>
 					{entries ? (
 						<Infinite
 							useWindowAsScrollContainer={true}
