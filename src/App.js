@@ -3,12 +3,9 @@ import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import Loadable from 'react-loadable';
 import Loader from './components/Loader';
 
-import './App.css';
+import BodyTracker from './components/BodyTracker';
 
-const BodyTracker = Loadable({
-	loader: () => import('./components/BodyTracker'),
-	loading: Loader
-});
+import './App.css';
 
 const Progress = Loadable({
 	loader: () => import('./components/Progress'),
@@ -22,7 +19,6 @@ const History = Loadable({
 
 class App extends Component {
 	componentDidMount() {
-		BodyTracker.preload();
 		Progress.preload();
 		History.preload();
 	}
