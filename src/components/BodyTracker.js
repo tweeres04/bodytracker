@@ -21,7 +21,7 @@ function entryData(entry) {
 
 function entryFormFactory() {
 	return {
-		weight: 150,
+		weight: '',
 		waist: '',
 		chest: '',
 		hips: '',
