@@ -28,6 +28,29 @@ class App extends Component {
 					<Route exact path="/" component={BodyTracker} />
 					<Route path="/progress" component={Progress} />
 					<Route path="/history" component={History} />
+					<footer className="footer">
+						<div className="container">
+							<div className="content has-text-centered">
+								<p>&copy; 2018 Tweeres Software</p>
+								<p>
+									Icon made by{' '}
+									<a
+										href="http://www.freepik.com"
+										title="Freepik"
+									>
+										Freepik
+									</a>{' '}
+									from{' '}
+									<a
+										href="https://www.flaticon.com/"
+										title="Flaticon"
+									>
+										flaticon.com
+									</a>
+								</p>
+							</div>
+						</div>
+					</footer>
 				</div>
 			</Router>
 		);
