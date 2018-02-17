@@ -18,26 +18,30 @@ function EntryListItem({
 		<div className="box">
 			<div className="level is-mobile">
 				<div className="level-left">
-					<div>
-						<h1 className="title is-5">
-							{timestamp.toDateString()}
-						</h1>
-						<div>Weight: {weight}</div>
-						<div>Waist: {waist}</div>
-						<div>Chest: {chest}</div>
-						<div>Hips: {hips}</div>
-						<div>Bodyfat: {bf}</div>
+					<div className="level-item">
+						<div>
+							<h1 className="title is-5">
+								{timestamp.toDateString()}
+							</h1>
+							{weight && <div>Weight: {weight}</div>}
+							{waist && <div>Waist: {waist}</div>}
+							{chest && <div>Chest: {chest}</div>}
+							{hips && <div>Hips: {hips}</div>}
+							{bf && <div>Bodyfat: {bf}</div>}
+						</div>
 					</div>
 				</div>
 				<div className="level-right">
-					<button
-						className="button is-danger is-outlined"
-						onClick={() => {
-							remove(id);
-						}}
-					>
-						Remove
-					</button>
+					<div className="level-item">
+						<button
+							className="button is-danger is-outlined"
+							onClick={() => {
+								remove(id);
+							}}
+						>
+							Remove
+						</button>
+					</div>
 				</div>
 			</div>
 		</div>
