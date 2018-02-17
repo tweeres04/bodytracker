@@ -3,6 +3,7 @@ import update from 'immutability-helper';
 import Infinite from 'react-infinite';
 import firebase from 'firebase/app';
 import _findIndex from 'lodash/fp/findIndex';
+import Loader from './Loader';
 
 function EntryListItem({
 	id,
@@ -74,23 +75,26 @@ export default class History extends Component {
 				))
 			: [];
 		return (
-			entries && (
-				<section className="section">
-					<div className="container">
+			<section className="section">
+				<div className="container">
+					{entries ? (
 						<Infinite
 							useWindowAsScrollContainer={true}
 							elementHeight={136}
 						>
 							{entrylistItems}
 						</Infinite>
-						{entries.length < 1 && (
+					) : (
+						<Loader />
+					)}
+					{entries &&
+						entries.length < 1 && (
 							<div className="box">
 								No entries yet. Add one to get started.
 							</div>
 						)}
-					</div>
-				</section>
-			)
+				</div>
+			</section>
 		);
 	}
 	// Need to add paging, seems like there's a bug in firestore for paging on a timestamp

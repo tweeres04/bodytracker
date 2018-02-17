@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import Chartjs from 'chart.js';
 import firebase from 'firebase/app';
 
+import Loader from './Loader';
+
 const colours = [
 	'rgb(50,115,220)',
 	'rgb(255,56,96)',
@@ -103,14 +105,19 @@ class Chart extends Component {
 					}
 				}
 			});
+		this.setState({ loading: false });
 	}
 	render() {
+		const { loading } = this.state;
 		return (
-			<canvas
-				ref={e => {
-					this.element = e;
-				}}
-			/>
+			<div>
+				{loading && <Loader />}
+				<canvas
+					ref={e => {
+						this.element = e;
+					}}
+				/>
+			</div>
 		);
 	}
 }
