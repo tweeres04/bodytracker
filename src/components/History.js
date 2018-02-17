@@ -2,12 +2,14 @@ import React, { Component } from 'react';
 import Infinite from 'react-infinite';
 import firebase from 'firebase/app';
 
-function EntryListItem({ id, timestamp, weight, waist, bf }) {
+function EntryListItem({ id, timestamp, weight, waist, chest, hips, bf }) {
 	return (
 		<div className="box" key={id}>
 			<div>Date: {timestamp.toDateString()}</div>
 			<div>Weight: {weight}</div>
 			<div>Waist: {waist}</div>
+			<div>Chest: {chest}</div>
+			<div>Hips: {hips}</div>
 			<div>Bodyfat: {bf}</div>
 		</div>
 	);

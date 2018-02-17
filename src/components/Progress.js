@@ -38,6 +38,8 @@ class Chart extends Component {
 		const times = entries.map(e => e.timestamp);
 		const weight = entries.map(e => e.weight);
 		const waist = entries.map(e => e.waist);
+		const chest = entries.map(e => e.chest);
+		const hips = entries.map(e => e.hips);
 		const bf = entries.map(e => e.bf);
 		this.element &&
 			new Chartjs(this.element, {
@@ -60,10 +62,24 @@ class Chart extends Component {
 							yAxisID: 'waist-bf-axis'
 						},
 						{
-							label: 'Bodyfat %',
-							data: bf,
+							label: 'Chest',
+							data: chest,
 							borderColor: colours[2],
 							backgroundColor: backgroundColours[2],
+							yAxisID: 'waist-bf-axis'
+						},
+						{
+							label: 'Hips',
+							data: hips,
+							borderColor: colours[3],
+							backgroundColor: backgroundColours[3],
+							yAxisID: 'waist-bf-axis'
+						},
+						{
+							label: 'Bodyfat %',
+							data: bf,
+							borderColor: colours[0],
+							backgroundColor: backgroundColours[0],
 							yAxisID: 'waist-bf-axis'
 						}
 					]
