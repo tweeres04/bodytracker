@@ -29,7 +29,7 @@ class App extends Component {
 					<div className="navbar">
 						<div className="navbar-brand">
 							<Link to="/" className="navbar-item">
-								Entry
+								Body Tracker
 							</Link>
 							<Link to="/progress" className="navbar-item">
 								Progress
