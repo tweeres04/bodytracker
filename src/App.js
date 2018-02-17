@@ -1,13 +1,27 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import Loadable from 'react-loadable';
+import Loader from './components/Loader';
+
+import BodyTracker from './components/BodyTracker';
 
 import './App.css';
 
-import BodyTracker from './components/BodyTracker';
-import Progress from './components/Progress';
-import History from './components/History';
+const Progress = Loadable({
+	loader: () => import('./components/Progress'),
+	loading: Loader
+});
+
+const History = Loadable({
+	loader: () => import('./components/History'),
+	loading: Loader
+});
 
 class App extends Component {
+	componentDidMount() {
+		Progress.preload();
+		History.preload();
+	}
 	render() {
 		return (
 			<Router>
