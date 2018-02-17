@@ -22,6 +22,8 @@ function entryFormFactory() {
 	return {
 		weight: '',
 		waist: '',
+		chest: '',
+		hips: '',
 		bf: ''
 	};
 }
@@ -81,7 +83,7 @@ export default class BodyTracker extends Component {
 	render() {
 		const {
 			user,
-			entry: { weight, waist, bf },
+			entry: { weight, waist, chest, hips, bf },
 			successNotification
 		} = this.state;
 
@@ -104,7 +106,21 @@ export default class BodyTracker extends Component {
 									name="waist"
 									value={waist}
 									handleChange={this.handleInputChange}
-									placeholder="Your current waist"
+									placeholder="Your current waist measurement"
+								/>
+								<BodyTrackerField
+									label="Chest"
+									name="chest"
+									value={chest}
+									handleChange={this.handleInputChange}
+									placeholder="Your current chest measurement"
+								/>
+								<BodyTrackerField
+									label="Hips"
+									name="hips"
+									value={hips}
+									handleChange={this.handleInputChange}
+									placeholder="Your current hips measurement"
 								/>
 								<BodyTrackerField
 									label="Bodyfat Percentage"
