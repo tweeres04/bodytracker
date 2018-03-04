@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
 
+import 'flatpickr/dist/themes/material_green.css';
+
 import firebase from 'firebase/app';
 import update from 'immutability-helper';
 import classnames from 'classnames';
+import Flatpickr from 'react-flatpickr';
 
 import _pickBy from 'lodash/fp/pickBy';
 import _toNumber from 'lodash/fp/toNumber';
@@ -13,14 +16,12 @@ function entryData(entry) {
 	if (_isEmpty(result)) {
 		return null;
 	}
-	result = Object.assign({}, result, {
-		timestamp: firebase.firestore.FieldValue.serverTimestamp()
-	});
 	return result;
 }
 
 function entryFormFactory() {
 	return {
+		timestamp: new Date(),
 		weight: '',
 		waist: '',
 		chest: '',
@@ -47,6 +48,36 @@ function EntrySuccessNotification({ active }) {
 				</div>
 			</div>
 		)
+	);
+}
+
+function BodyTrackerDateField({
+	label,
+	name,
+	value,
+	handleChange,
+	placeholder
+}) {
+	return (
+		<div className="field">
+			<label htmlFor="" className="label">
+				{label}
+			</label>
+			<div className="control">
+				<Flatpickr
+					className="input"
+					name={name}
+					placeholder={placeholder}
+					value={value}
+					onChange={handleChange}
+					options={{
+						enableTime: true,
+						altInput: true,
+						altFormat: 'M j, Y - h:i K'
+					}}
+				/>
+			</div>
+		</div>
 	);
 }
 
@@ -82,10 +113,15 @@ export default class BodyTracker extends Component {
 				resolve(user);
 			});
 		});
+		document.addEventListener('visibilitychange', () => {
+			if (!document.hidden) {
+				this.now();
+			}
+		});
 	}
 	render() {
 		const {
-			entry: { weight, waist, chest, hips, bf },
+			entry: { timestamp, weight, waist, chest, hips, bf },
 			successNotification,
 			submitting
 		} = this.state;
@@ -103,6 +139,18 @@ export default class BodyTracker extends Component {
 					<div className="columns">
 						<div className="column">
 							<h1 className="title">Body Tracker</h1>
+							<BodyTrackerDateField
+								label="Date and Time"
+								name="timestamp"
+								value={timestamp}
+								handleChange={dates => {
+									const result = update(this.state, {
+										entry: { timestamp: { $set: dates[0] } }
+									});
+									this.setState(result);
+								}}
+								placeholder="Date and time of entry"
+							/>
 							<BodyTrackerField
 								label="Weight"
 								name="weight"
@@ -190,4 +238,10 @@ export default class BodyTracker extends Component {
 	componentWillUnmount() {
 		clearTimeout(this.timeoutHandle);
 	}
+	now = () => {
+		const statePatch = update(this.state, {
+			entry: { timestamp: { $set: new Date() } }
+		});
+		this.setState(statePatch);
+	};
 }
