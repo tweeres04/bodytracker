@@ -3,6 +3,7 @@ import update from 'immutability-helper';
 import Infinite from 'react-infinite';
 import firebase from 'firebase/app';
 import _findIndex from 'lodash/fp/findIndex';
+import dateFormat from 'date-fns/format';
 import Loader from './Loader';
 
 function EntryListItem({
@@ -21,9 +22,10 @@ function EntryListItem({
 				<div className="level-left">
 					<div className="level-item">
 						<div>
-							<h1 className="title is-5">
+							<h1 className="title is-5 is-spaced">
 								{timestamp.toDateString()}
 							</h1>
+							<div>{dateFormat(timestamp, 'h:mm A')}</div>
 							{weight && <div>Weight: {weight}</div>}
 							{waist && <div>Waist: {waist}</div>}
 							{chest && <div>Chest: {chest}</div>}
