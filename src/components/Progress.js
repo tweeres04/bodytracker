@@ -54,35 +54,40 @@ class Chart extends Component {
 							data: weight,
 							borderColor: colours[0],
 							backgroundColor: backgroundColours[0],
-							yAxisID: 'weight-axis'
+							yAxisID: 'weight-axis',
+							lineTension: 0
 						},
 						{
 							label: 'Waist',
 							data: waist,
 							borderColor: colours[1],
 							backgroundColor: backgroundColours[1],
-							yAxisID: 'waist-bf-axis'
+							yAxisID: 'waist-bf-axis',
+							lineTension: 0
 						},
 						{
 							label: 'Chest',
 							data: chest,
 							borderColor: colours[2],
 							backgroundColor: backgroundColours[2],
-							yAxisID: 'waist-bf-axis'
+							yAxisID: 'waist-bf-axis',
+							lineTension: 0
 						},
 						{
 							label: 'Hips',
 							data: hips,
 							borderColor: colours[3],
 							backgroundColor: backgroundColours[3],
-							yAxisID: 'waist-bf-axis'
+							yAxisID: 'waist-bf-axis',
+							lineTension: 0
 						},
 						{
 							label: 'Bodyfat %',
 							data: bf,
 							borderColor: colours[0],
 							backgroundColor: backgroundColours[0],
-							yAxisID: 'waist-bf-axis'
+							yAxisID: 'waist-bf-axis',
+							lineTension: 0
 						}
 					]
 				},
