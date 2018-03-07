@@ -38,7 +38,8 @@ function EntrySuccessNotification({ active }) {
 					position: 'fixed',
 					left: 0,
 					bottom: 0,
-					width: '100%'
+					width: '100%',
+					zIndex: 1
 				}}
 			>
 				<div className="container">
@@ -100,6 +101,8 @@ function BodyTrackerField({ label, name, value, handleChange, placeholder }) {
 		</div>
 	);
 }
+
+let timeoutHandle;
 
 export default class BodyTracker extends Component {
 	state = {
@@ -230,13 +233,13 @@ export default class BodyTracker extends Component {
 				successNotification: true,
 				submitting: false
 			}));
-			this.timeoutHandle = setTimeout(() => {
+			timeoutHandle = setTimeout(() => {
 				this.setState({ successNotification: false });
 			}, 3000);
 		}
 	};
 	componentWillUnmount() {
-		clearTimeout(this.timeoutHandle);
+		clearTimeout(timeoutHandle);
 	}
 	now = () => {
 		const statePatch = update(this.state, {

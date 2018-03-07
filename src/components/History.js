@@ -3,6 +3,7 @@ import update from 'immutability-helper';
 import Infinite from 'react-infinite';
 import firebase from 'firebase/app';
 import _findIndex from 'lodash/fp/findIndex';
+import _orderBy from 'lodash/fp/orderBy';
 import dateFormat from 'date-fns/format';
 import Loader from './Loader';
 
@@ -51,9 +52,45 @@ function EntryListItem({
 	);
 }
 
+function UndoDeleteAlert({ undoDelete }) {
+	return (
+		<div
+			className="notification"
+			style={{
+				position: 'fixed',
+				bottom: 0,
+				left: 0,
+				width: '100%',
+				zIndex: 1
+			}}
+		>
+			<div className="level is-mobile">
+				<div className="level-left">
+					<div className="level-item">
+						<p>Entry removed.</p>
+					</div>
+				</div>
+				<div className="level-right">
+					<div className="level-item">
+						<button
+							onClick={undoDelete}
+							className="button is-outlined"
+						>
+							Undo
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+}
+
+let deletedEntry, timeoutHandle;
+
 export default class History extends Component {
 	state = {
-		entries: null
+		entries: null,
+		undoDeleteAlert: false
 	};
 	async componentDidMount() {
 		await new Promise((resolve, reject) => {
@@ -66,7 +103,7 @@ export default class History extends Component {
 		this.loadEntries();
 	}
 	render() {
-		const { entries } = this.state;
+		const { entries, undoDeleteAlert } = this.state;
 		const entrylistItems = entries
 			? entries.map(e => (
 					<EntryListItem
@@ -96,6 +133,9 @@ export default class History extends Component {
 								No entries yet. Add one to get started.
 							</div>
 						)}
+					{undoDeleteAlert && (
+						<UndoDeleteAlert undoDelete={this.undo} />
+					)}
 				</div>
 			</section>
 		);
@@ -120,15 +160,47 @@ export default class History extends Component {
 	removeEntry = async entryId => {
 		const { entries } = this.state;
 		const index = _findIndex(e => e.id == entryId)(entries);
+		deletedEntry = entries[index];
 		this.setState(prevState =>
 			update(prevState, {
-				entries: { $splice: [[index, 1]] }
+				entries: { $splice: [[index, 1]] },
+				undoDeleteAlert: { $set: true }
 			})
 		);
 		const { uid } = firebase.auth().currentUser;
+		timeoutHandle = setTimeout(() => {
+			this.setState({ undoDeleteAlert: false });
+		}, 7000);
 		await firebase
 			.firestore()
 			.doc(`users/${uid}/entries/${entryId}`)
 			.delete();
+	};
+	undo = async () => {
+		const { uid } = firebase.auth().currentUser;
+		const { id: newId } = await firebase
+			.firestore()
+			.collection(`users/${uid}/entries`)
+			.add(deletedEntry);
+
+		this.setState(prevState => {
+			const statePatch = update(prevState, {
+				entries: {
+					$push: [Object.assign(deletedEntry, { id: newId })]
+				},
+				undoDeleteAlert: { $set: false }
+			});
+
+			statePatch.entries = _orderBy(['timestamp'])(['desc'])(
+				statePatch.entries
+			);
+
+			return statePatch;
+		});
+		deletedEntry = null;
+		clearTimeout(timeoutHandle);
+	};
+	componentWillUnmount = () => {
+		clearTimeout(timeoutHandle);
 	};
 }
