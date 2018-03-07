@@ -55,7 +55,7 @@ function EntryListItem({
 function UndoDeleteAlert({ undoDelete }) {
 	return (
 		<div
-			className="notification"
+			className="notification is-info"
 			style={{
 				position: 'fixed',
 				bottom: 0,
@@ -74,7 +74,7 @@ function UndoDeleteAlert({ undoDelete }) {
 					<div className="level-item">
 						<button
 							onClick={undoDelete}
-							className="button is-outlined"
+							className="button is-inverted is-info"
 						>
 							Undo
 						</button>
