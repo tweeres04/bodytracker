@@ -45,5 +45,23 @@
 			To begin the development, run `npm start` or `yarn start`.
 			To create a production bundle, use `npm run build` or `yarn build`.
 		-->
+		<% if (process.env.NODE_ENV == 'production') { %>
+			<script async src='https://www.google-analytics.com/analytics.js'></script>
+			<script async src='%PUBLIC_URL%/autotrack.js'></script>
+			<script>
+				window.ga(
+					'create',
+					'<%= process.env.REACT_APP_GA_TRACKING_CODE %>',
+					'auto'
+				);
+				window.ga('require', 'impressionTracker');
+				window.ga('require', 'maxScrollTracker');
+				window.ga('require', 'mediaQueryTracker');
+				window.ga('require', 'pageVisibilityTracker');
+				window.ga('require', 'urlChangeTracker');
+
+				window.ga('send', 'pageview');
+			</script>
+		<% } %>
 	</body>
 </html>
