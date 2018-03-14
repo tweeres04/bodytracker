@@ -17,8 +17,14 @@ const History = Loadable({
 	loading: Loader
 });
 
+const Stats = Loadable({
+	loader: () => import('./components/Stats'),
+	loading: Loader
+});
+
 class App extends Component {
 	componentDidMount() {
+		Stats.preload();
 		Progress.preload();
 		History.preload();
 	}
@@ -31,6 +37,9 @@ class App extends Component {
 							<Link to="/" className="navbar-item">
 								Body Tracker
 							</Link>
+							<Link to="/stats" className="navbar-item">
+								Stats
+							</Link>
 							<Link to="/progress" className="navbar-item">
 								Progress
 							</Link>
@@ -40,6 +49,7 @@ class App extends Component {
 						</div>
 					</div>
 					<Route exact path="/" component={BodyTracker} />
+					<Route path="/stats" component={Stats} />
 					<Route path="/progress" component={Progress} />
 					<Route path="/history" component={History} />
 					<footer className="footer">
