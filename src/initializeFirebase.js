@@ -17,11 +17,4 @@ export default function initializeFirebase() {
 	};
 
 	firebase.initializeApp(config);
-
-	firebase
-		.auth()
-		.signInAnonymously()
-		.catch(err => {
-			console.error(err);
-		});
 }

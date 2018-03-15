@@ -113,7 +113,9 @@ export default class BodyTracker extends Component {
 	componentDidMount() {
 		this.userPromise = new Promise((resolve, reject) => {
 			firebase.auth().onAuthStateChanged(user => {
-				resolve(user);
+				if (user) {
+					resolve(user);
+				}
 			});
 		});
 		document.addEventListener('visibilitychange', () => {
