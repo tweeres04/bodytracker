@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import firebase from 'firebase';
 import Loadable from 'react-loadable';
-import Loader from './components/Loader';
+import classnames from 'classnames';
 
+import Loader from './components/Loader';
 import BodyTracker from './components/BodyTracker';
 
 import './App.css';
@@ -30,7 +31,8 @@ const Signin = Loadable({
 
 class App extends Component {
 	state = {
-		user: 'loading'
+		user: 'loading',
+		mobileMenu: false
 	};
 	componentDidMount() {
 		firebase.auth().onAuthStateChanged(user => {
@@ -52,7 +54,7 @@ class App extends Component {
 		Signin.preload();
 	}
 	render() {
-		const { user } = this.state;
+		const { user, mobileMenu } = this.state;
 		return (
 			<Router>
 				<div className="App">
@@ -61,22 +63,49 @@ class App extends Component {
 							<Link to="/" className="navbar-item">
 								Body Tracker
 							</Link>
-							<Link to="/stats" className="navbar-item">
-								Stats
-							</Link>
-							<Link to="/progress" className="navbar-item">
-								Progress
-							</Link>
-							<Link to="/history" className="navbar-item">
-								History
-							</Link>
-							{user != 'loading' &&
-								user &&
-								user.isAnonymous && (
-									<Link to="/signin" className="navbar-item">
-										Sign In
-									</Link>
-								)}
+							<div
+								className={classnames('navbar-burger', {
+									'is-active': mobileMenu
+								})}
+								onClick={() => {
+									this.setState(({ mobileMenu }) => ({
+										mobileMenu: !mobileMenu
+									}));
+								}}
+							>
+								<span />
+								<span />
+								<span />
+							</div>
+						</div>
+						<div
+							className={classnames('navbar-menu', {
+								'is-active': mobileMenu
+							})}
+						>
+							<div className="navbar-start">
+								<Link to="/stats" className="navbar-item">
+									Stats
+								</Link>
+								<Link to="/progress" className="navbar-item">
+									Progress
+								</Link>
+								<Link to="/history" className="navbar-item">
+									History
+								</Link>
+							</div>
+							<div className="navbar-end">
+								{user != 'loading' &&
+									user &&
+									user.isAnonymous && (
+										<Link
+											to="/signin"
+											className="navbar-item"
+										>
+											Sign In
+										</Link>
+									)}
+							</div>
 						</div>
 					</div>
 					<Route exact path="/" component={BodyTracker} />
