@@ -114,7 +114,8 @@ export default class Progress extends Component {
 				borderColor: colours[2],
 				backgroundColor: backgroundColours[2],
 				yAxisID: 'waist-bf-axis',
-				lineTension: 0
+				lineTension: 0,
+				spanGaps: true
 			},
 			{
 				label: 'Hips',
