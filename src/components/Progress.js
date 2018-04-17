@@ -19,8 +19,49 @@ const backgroundColours = [
 ];
 
 class Chart extends Component {
+	componentDidMount() {
+		const { datasets, times } = this.props;
+		new Chartjs(this.element, {
+			type: 'line',
+			data: {
+				labels: times,
+				datasets
+			},
+			options: {
+				scales: {
+					xAxes: [
+						{
+							type: 'time'
+						}
+					],
+					yAxes: [
+						{
+							id: 'weight-axis'
+						},
+						{
+							id: 'waist-bf-axis',
+							position: 'right'
+						}
+					]
+				}
+			}
+		});
+	}
+	render() {
+		return (
+			<canvas
+				ref={e => {
+					this.element = e;
+				}}
+			/>
+		);
+	}
+}
+
+export default class Progress extends Component {
 	state = {
-		loading: true
+		loading: true,
+		entries: []
 	};
 	async componentDidMount() {
 		const userPromise = new Promise((resolve, reject) => {
@@ -37,107 +78,89 @@ class Chart extends Component {
 			.orderBy('timestamp')
 			.get();
 		const entries = querySnapshot.docs.map(ds => ds.data());
+		this.setState({ entries, loading: false });
+	}
+	render() {
+		const { loading, entries } = this.state;
 		const times = entries.map(e => e.timestamp);
 		const weight = entries.map(e => e.weight);
 		const waist = entries.map(e => e.waist);
 		const chest = entries.map(e => e.chest);
 		const hips = entries.map(e => e.hips);
 		const bf = entries.map(e => e.bf);
-		this.element &&
-			new Chartjs(this.element, {
-				type: 'line',
-				data: {
-					labels: times,
-					datasets: [
-						{
-							label: 'Weight',
-							data: weight,
-							borderColor: colours[0],
-							backgroundColor: backgroundColours[0],
-							yAxisID: 'weight-axis',
-							lineTension: 0
-						},
-						{
-							label: 'Waist',
-							data: waist,
-							borderColor: colours[1],
-							backgroundColor: backgroundColours[1],
-							yAxisID: 'waist-bf-axis',
-							lineTension: 0
-						},
-						{
-							label: 'Chest',
-							data: chest,
-							borderColor: colours[2],
-							backgroundColor: backgroundColours[2],
-							yAxisID: 'waist-bf-axis',
-							lineTension: 0
-						},
-						{
-							label: 'Hips',
-							data: hips,
-							borderColor: colours[3],
-							backgroundColor: backgroundColours[3],
-							yAxisID: 'waist-bf-axis',
-							lineTension: 0
-						},
-						{
-							label: 'Bodyfat %',
-							data: bf,
-							borderColor: colours[0],
-							backgroundColor: backgroundColours[0],
-							yAxisID: 'waist-bf-axis',
-							lineTension: 0
-						}
-					]
-				},
-				options: {
-					scales: {
-						xAxes: [
-							{
-								type: 'time'
-							}
-						],
-						yAxes: [
-							{
-								id: 'weight-axis'
-							},
-							{
-								id: 'waist-bf-axis',
-								position: 'right'
-							}
-						]
-					}
-				}
-			});
-		this.setState({ loading: false });
-	}
-	render() {
-		const { loading } = this.state;
-		return (
-			<div>
-				{loading && <Loader />}
-				<canvas
-					ref={e => {
-						this.element = e;
-					}}
-				/>
-			</div>
+
+		const datasets = [
+			{
+				label: 'Weight',
+				data: weight,
+				borderColor: colours[0],
+				backgroundColor: backgroundColours[0],
+				yAxisID: 'weight-axis',
+				lineTension: 0
+			},
+			{
+				label: 'Waist',
+				data: waist,
+				borderColor: colours[1],
+				backgroundColor: backgroundColours[1],
+				yAxisID: 'waist-bf-axis',
+				lineTension: 0
+			},
+			{
+				label: 'Chest',
+				data: chest,
+				borderColor: colours[2],
+				backgroundColor: backgroundColours[2],
+				yAxisID: 'waist-bf-axis',
+				lineTension: 0
+			},
+			{
+				label: 'Hips',
+				data: hips,
+				borderColor: colours[3],
+				backgroundColor: backgroundColours[3],
+				yAxisID: 'waist-bf-axis',
+				lineTension: 0
+			},
+			{
+				label: 'Bodyfat %',
+				data: bf,
+				borderColor: colours[0],
+				backgroundColor: backgroundColours[0],
+				yAxisID: 'waist-bf-axis',
+				lineTension: 0
+			}
+		];
+
+		return loading ? (
+			<Loader />
+		) : (
+			<section className="section">
+				<div className="container">
+					<div className="columns">
+						<div className="column">
+							<h1 className="title">Progress</h1>
+							<Chart
+								times={times}
+								datasets={datasets}
+								key="all"
+							/>
+						</div>
+					</div>
+					{datasets.map(d => (
+						<div className="columns">
+							<div className="column">
+								<h2 className="title is-5">{d.label}</h2>
+								<Chart
+									times={times}
+									datasets={[d]}
+									key={d.label}
+								/>
+							</div>
+						</div>
+					))}
+				</div>
+			</section>
 		);
 	}
-}
-
-export default function Progress() {
-	return (
-		<section className="section">
-			<div className="container">
-				<div className="columns">
-					<div className="column">
-						<h1 className="title">Progress</h1>
-						<Chart />
-					</div>
-				</div>
-			</div>
-		</section>
-	);
 }

@@ -2,7 +2,7 @@ import React from 'react';
 import firebase from 'firebase';
 import FirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 
-export default function Signin({ history }) {
+export default function Signin() {
 	return (
 		<FirebaseAuth
 			uiConfig={{
