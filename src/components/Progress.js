@@ -96,7 +96,8 @@ export default class Progress extends Component {
 				borderColor: colours[0],
 				backgroundColor: backgroundColours[0],
 				yAxisID: 'weight-axis',
-				lineTension: 0
+				lineTension: 0,
+				spanGaps: true
 			},
 			{
 				label: 'Waist',
@@ -104,7 +105,8 @@ export default class Progress extends Component {
 				borderColor: colours[1],
 				backgroundColor: backgroundColours[1],
 				yAxisID: 'waist-bf-axis',
-				lineTension: 0
+				lineTension: 0,
+				spanGaps: true
 			},
 			{
 				label: 'Chest',
@@ -120,7 +122,8 @@ export default class Progress extends Component {
 				borderColor: colours[3],
 				backgroundColor: backgroundColours[3],
 				yAxisID: 'waist-bf-axis',
-				lineTension: 0
+				lineTension: 0,
+				spanGaps: true
 			},
 			{
 				label: 'Bodyfat %',
@@ -128,7 +131,8 @@ export default class Progress extends Component {
 				borderColor: colours[0],
 				backgroundColor: backgroundColours[0],
 				yAxisID: 'waist-bf-axis',
-				lineTension: 0
+				lineTension: 0,
+				spanGaps: true
 			}
 		];
 
