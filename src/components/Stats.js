@@ -10,15 +10,21 @@ import _round from 'lodash/round';
 
 import Loader from './Loader';
 
-function Statistic({ label, latestEntry, firstEntry, prefix = true }) {
-	const value = _round(latestEntry - firstEntry, 2);
-	const displayValue = prefix && value > 0 ? `+${value}` : value;
-	const percentage = _round(value / firstEntry * 100, 2);
+function Statistic({ label, latestEntry, firstEntry }) {
+	const value = firstEntry
+		? _round(latestEntry - firstEntry, 2)
+		: latestEntry;
+	const displayValue = firstEntry && value > 0 ? `+${value}` : value;
+	const percentage = firstEntry ? _round(value / firstEntry * 100, 2) : null;
 	return value ? (
 		<div className="column has-text-centered">
 			<div className="heading">{label}</div>
 			<div className="title is-4 is-marginless">{displayValue}</div>
-			<div className="is-size-6 has-text-grey-light">{percentage}%</div>
+			{percentage && (
+				<div className="is-size-6 has-text-grey-light">
+					{percentage}%
+				</div>
+			)}
 		</div>
 	) : null;
 }
@@ -40,8 +46,7 @@ function StatisticsRange({ entries, days }) {
 		<div className="columns is-mobile">
 			<Statistic
 				label="Entries"
-				value={entriesInTimeframe.length}
-				prefix={false}
+				latestEntry={entriesInTimeframe.length}
 			/>
 			<Statistic
 				label="Weight"
