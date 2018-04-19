@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import Chartjs from 'chart.js';
 import firebase from 'firebase/app';
 
+import _cloneDeep from 'lodash/fp/cloneDeep';
+
 import Loader from './Loader';
 
 const colours = [
@@ -21,6 +23,14 @@ const backgroundColours = [
 class Chart extends Component {
 	componentDidMount() {
 		const { datasets, times } = this.props;
+		let { yAxes } = this.props;
+
+		yAxes = _cloneDeep(yAxes);
+
+		if (yAxes.length > 1) {
+			yAxes[1].position = 'right';
+		}
+
 		new Chartjs(this.element, {
 			type: 'line',
 			data: {
@@ -34,15 +44,7 @@ class Chart extends Component {
 							type: 'time'
 						}
 					],
-					yAxes: [
-						{
-							id: 'weight-axis'
-						},
-						{
-							id: 'waist-bf-axis',
-							position: 'right'
-						}
-					]
+					yAxes
 				}
 			}
 		});
@@ -104,7 +106,7 @@ export default class Progress extends Component {
 				data: waist,
 				borderColor: colours[1],
 				backgroundColor: backgroundColours[1],
-				yAxisID: 'waist-bf-axis',
+				yAxisID: 'other-axis',
 				lineTension: 0,
 				spanGaps: true
 			},
@@ -113,7 +115,7 @@ export default class Progress extends Component {
 				data: chest,
 				borderColor: colours[2],
 				backgroundColor: backgroundColours[2],
-				yAxisID: 'waist-bf-axis',
+				yAxisID: 'other-axis',
 				lineTension: 0,
 				spanGaps: true
 			},
@@ -122,7 +124,7 @@ export default class Progress extends Component {
 				data: hips,
 				borderColor: colours[3],
 				backgroundColor: backgroundColours[3],
-				yAxisID: 'waist-bf-axis',
+				yAxisID: 'other-axis',
 				lineTension: 0,
 				spanGaps: true
 			},
@@ -131,11 +133,20 @@ export default class Progress extends Component {
 				data: bf,
 				borderColor: colours[0],
 				backgroundColor: backgroundColours[0],
-				yAxisID: 'waist-bf-axis',
+				yAxisID: 'other-axis',
 				lineTension: 0,
 				spanGaps: true
 			}
 		];
+
+		const yAxes = {
+			weightAxis: {
+				id: 'weight-axis'
+			},
+			otherAxis: {
+				id: 'other-axis'
+			}
+		};
 
 		return loading ? (
 			<Loader />
@@ -145,14 +156,26 @@ export default class Progress extends Component {
 					<div className="columns" key="all">
 						<div className="column">
 							<h1 className="title">Progress</h1>
-							<Chart times={times} datasets={datasets} />
+							<Chart
+								times={times}
+								datasets={datasets}
+								yAxes={[yAxes.weightAxis, yAxes.otherAxis]}
+							/>
 						</div>
 					</div>
 					{datasets.map(d => (
 						<div className="columns" key={d.label}>
 							<div className="column">
 								<h2 className="title is-5">{d.label}</h2>
-								<Chart times={times} datasets={[d]} />
+								<Chart
+									times={times}
+									datasets={[d]}
+									yAxes={[
+										d.label == 'Weight'
+											? yAxes.weightAxis
+											: yAxes.otherAxis
+									]}
+								/>
 							</div>
 						</div>
 					))}
