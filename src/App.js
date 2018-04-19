@@ -105,6 +105,15 @@ class App extends Component {
 											Sign In
 										</Link>
 									)}
+								{user &&
+									!user.isAnonymous && (
+										<a
+											className="navbar-item"
+											onClick={this.logout}
+										>
+											Logout
+										</a>
+									)}
 							</div>
 						</div>
 					</div>
@@ -140,6 +149,10 @@ class App extends Component {
 			</Router>
 		);
 	}
+	logout = e => {
+		e.preventDefault();
+		firebase.auth().signOut();
+	};
 }
 
 export default App;
