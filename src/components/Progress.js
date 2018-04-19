@@ -142,25 +142,17 @@ export default class Progress extends Component {
 		) : (
 			<section className="section">
 				<div className="container">
-					<div className="columns">
+					<div className="columns" key="all">
 						<div className="column">
 							<h1 className="title">Progress</h1>
-							<Chart
-								times={times}
-								datasets={datasets}
-								key="all"
-							/>
+							<Chart times={times} datasets={datasets} />
 						</div>
 					</div>
 					{datasets.map(d => (
-						<div className="columns">
+						<div className="columns" key={d.label}>
 							<div className="column">
 								<h2 className="title is-5">{d.label}</h2>
-								<Chart
-									times={times}
-									datasets={[d]}
-									key={d.label}
-								/>
+								<Chart times={times} datasets={[d]} />
 							</div>
 						</div>
 					))}

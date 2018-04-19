@@ -105,6 +105,15 @@ class App extends Component {
 											Sign In
 										</Link>
 									)}
+								{user &&
+									!user.isAnonymous && (
+										<a
+											className="navbar-item"
+											onClick={this.logout}
+										>
+											Logout
+										</a>
+									)}
 							</div>
 						</div>
 					</div>
@@ -140,6 +149,12 @@ class App extends Component {
 			</Router>
 		);
 	}
+	logout = async e => {
+		e.preventDefault();
+		await firebase.auth().signOut();
+		// Need to refactor to reload each route instead of using a reload
+		window.location.reload();
+	};
 }
 
 export default App;
