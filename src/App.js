@@ -149,9 +149,11 @@ class App extends Component {
 			</Router>
 		);
 	}
-	logout = e => {
+	logout = async e => {
 		e.preventDefault();
-		firebase.auth().signOut();
+		await firebase.auth().signOut();
+		// Need to refactor to reload each route instead of using a reload
+		window.location.reload();
 	};
 }
 
