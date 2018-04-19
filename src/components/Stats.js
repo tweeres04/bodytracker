@@ -10,12 +10,15 @@ import _round from 'lodash/round';
 
 import Loader from './Loader';
 
-function Statistic({ label, value, prefix = true }) {
+function Statistic({ label, latestEntry, firstEntry, prefix = true }) {
+	const value = _round(latestEntry - firstEntry, 2);
 	const displayValue = prefix && value > 0 ? `+${value}` : value;
+	const percentage = _round(value / firstEntry * 100, 2);
 	return value ? (
 		<div className="column has-text-centered">
 			<div className="heading">{label}</div>
-			<div className="title is-4">{displayValue}</div>
+			<div className="title is-4 is-marginless">{displayValue}</div>
+			<div className="is-size-6 has-text-grey-light">{percentage}%</div>
 		</div>
 	) : null;
 }
@@ -42,23 +45,28 @@ function StatisticsRange({ entries, days }) {
 			/>
 			<Statistic
 				label="Weight"
-				value={_round(latestEntry.weight - firstEntry.weight, 2)}
+				latestEntry={latestEntry.weight}
+				firstEntry={firstEntry.weight}
 			/>
 			<Statistic
 				label="Waist"
-				value={_round(latestEntry.waist - firstEntry.waist, 2)}
+				latestEntry={latestEntry.waist}
+				firstEntry={firstEntry.waist}
 			/>
 			<Statistic
 				label="Chest"
-				value={_round(latestEntry.chest - firstEntry.chest, 2)}
+				latestEntry={latestEntry.chest}
+				firstEntry={firstEntry.chest}
 			/>
 			<Statistic
 				label="Hips"
-				value={_round(latestEntry.hips - firstEntry.hips, 2)}
+				latestEntry={latestEntry.hips}
+				firstEntry={firstEntry.hips}
 			/>
 			<Statistic
 				label="Bodyfat Percentage"
-				value={_round(latestEntry.bf - firstEntry.bf, 2)}
+				latestEntry={latestEntry.bf}
+				firstEntry={firstEntry.bf}
 			/>
 		</div>
 	);
