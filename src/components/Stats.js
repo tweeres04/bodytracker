@@ -91,11 +91,15 @@ function Statistics({ entries }) {
 	const now = new Date();
 	return (
 		<div>
-			<h3 className="title is-4">Past Week</h3>
+			<h3 className="title is-4" style={{ marginBottom: '0.25rem' }}>
+				Past Week
+			</h3>
 			<StatisticsRange entries={entries} days={7} />
-			<h3 className="title is-4">Past Month</h3>
+			<h3 className="title is-4" style={{ marginBottom: '0.25rem' }}>
+				Past Month
+			</h3>
 			<StatisticsRange entries={entries} days={30} />
-			<h3 className="title is-4">
+			<h3 className="title is-4" style={{ marginBottom: '0.25rem' }}>
 				All Time ({distanceInWords(now, firstDate)})
 			</h3>
 			<StatisticsRange entries={entries} days={30000} />
