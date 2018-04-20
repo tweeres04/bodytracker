@@ -19,9 +19,10 @@ function Statistic({ label, latestEntry, firstEntry }) {
 	const displayValue = firstEntry && value > 0 ? `+${value}` : value;
 	const percentage = firstEntry ? _round(value / firstEntry * 100, 2) : null;
 
-	const valueClasses = classnames('title is-3 is-marginless', {
-		'has-text-success': firstEntry && value < 0
-	});
+	const valueClasses = classnames(
+		'title is-4 is-marginless',
+		firstEntry && value < 0 ? 'has-text-success' : 'has-text-grey-dark'
+	);
 	const tagClasses = classnames('tag is-rounded', {
 		'is-success': firstEntry && value < 0
 	});
@@ -49,36 +50,38 @@ function StatisticsRange({ entries, days }) {
 	const firstEntry = entries[index];
 
 	return (
-		<div className="columns is-mobile is-gapless">
-			<Statistic
-				label="Entries"
-				latestEntry={entriesInTimeframe.length}
-			/>
-			<Statistic
-				label="Weight"
-				latestEntry={latestEntry.weight}
-				firstEntry={firstEntry.weight}
-			/>
-			<Statistic
-				label="Waist"
-				latestEntry={latestEntry.waist}
-				firstEntry={firstEntry.waist}
-			/>
-			<Statistic
-				label="Chest"
-				latestEntry={latestEntry.chest}
-				firstEntry={firstEntry.chest}
-			/>
-			<Statistic
-				label="Hips"
-				latestEntry={latestEntry.hips}
-				firstEntry={firstEntry.hips}
-			/>
-			<Statistic
-				label="Bodyfat Percentage"
-				latestEntry={latestEntry.bf}
-				firstEntry={firstEntry.bf}
-			/>
+		<div className="box">
+			<div className="columns is-mobile is-gapless">
+				<Statistic
+					label="Entries"
+					latestEntry={entriesInTimeframe.length}
+				/>
+				<Statistic
+					label="Weight"
+					latestEntry={latestEntry.weight}
+					firstEntry={firstEntry.weight}
+				/>
+				<Statistic
+					label="Waist"
+					latestEntry={latestEntry.waist}
+					firstEntry={firstEntry.waist}
+				/>
+				<Statistic
+					label="Chest"
+					latestEntry={latestEntry.chest}
+					firstEntry={firstEntry.chest}
+				/>
+				<Statistic
+					label="Hips"
+					latestEntry={latestEntry.hips}
+					firstEntry={firstEntry.hips}
+				/>
+				<Statistic
+					label="Bodyfat Percentage"
+					latestEntry={latestEntry.bf}
+					firstEntry={firstEntry.bf}
+				/>
+			</div>
 		</div>
 	);
 }
@@ -119,16 +122,18 @@ export default class Stats extends Component {
 		return entries == 'loading' ? (
 			<Loader />
 		) : (
-			<section className="section">
-				<div className="container">
-					<h1 className="title">Stats</h1>
-					{entries && entries.length < 1 ? (
-						<div className="box">
-							No entries yet. Add one to get started.
-						</div>
-					) : (
-						<Statistics entries={entries} />
-					)}
+			<section className="hero is-primary is-bold is-fullheight">
+				<div className="hero-body">
+					<div className="container">
+						<h1 className="title">Stats</h1>
+						{entries && entries.length < 1 ? (
+							<div className="box">
+								No entries yet. Add one to get started.
+							</div>
+						) : (
+							<Statistics entries={entries} />
+						)}
+					</div>
 				</div>
 			</section>
 		);
