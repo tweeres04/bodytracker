@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import firebase from 'firebase';
+import classnames from 'classnames';
 
 import dateAddDays from 'date-fns/add_days';
 import dateClosestIndexTo from 'date-fns/closest_index_to';
@@ -17,15 +18,19 @@ function Statistic({ label, latestEntry, firstEntry }) {
 		: latestEntry;
 	const displayValue = firstEntry && value > 0 ? `+${value}` : value;
 	const percentage = firstEntry ? _round(value / firstEntry * 100, 2) : null;
+
+	const valueClasses = classnames('title is-3 is-marginless', {
+		'has-text-success': firstEntry && value < 0
+	});
+	const tagClasses = classnames('tag is-rounded', {
+		'is-success': firstEntry && value < 0
+	});
+
 	return value ? (
 		<div className="column has-text-centered">
-			<div className="heading">{label}</div>
-			<div className="title is-4 is-marginless">{displayValue}</div>
-			{percentage && (
-				<div className="is-size-6 has-text-grey-light">
-					{percentage}%
-				</div>
-			)}
+			<div className="heading has-text-grey-light">{label}</div>
+			<div className={valueClasses}>{displayValue}</div>
+			{percentage && <div className={tagClasses}>{percentage}%</div>}
 		</div>
 	) : null;
 }
@@ -44,7 +49,7 @@ function StatisticsRange({ entries, days }) {
 	const firstEntry = entries[index];
 
 	return (
-		<div className="columns is-mobile">
+		<div className="columns is-mobile is-gapless">
 			<Statistic
 				label="Entries"
 				latestEntry={entriesInTimeframe.length}
