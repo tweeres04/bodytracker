@@ -5,6 +5,7 @@ import dateAddDays from 'date-fns/add_days';
 import dateClosestIndexTo from 'date-fns/closest_index_to';
 import dateIsAfter from 'date-fns/is_after';
 import startOfDay from 'date-fns/start_of_day';
+import distanceInWords from 'date-fns/distance_in_words';
 
 import _round from 'lodash/round';
 
@@ -78,13 +79,17 @@ function StatisticsRange({ entries, days }) {
 }
 
 function Statistics({ entries }) {
+	const firstDate = entries[entries.length - 1].timestamp;
+	const now = new Date();
 	return (
 		<div>
 			<h3 className="title is-4">Past Week</h3>
 			<StatisticsRange entries={entries} days={7} />
 			<h3 className="title is-4">Past Month</h3>
 			<StatisticsRange entries={entries} days={30} />
-			<h3 className="title is-4">All Time</h3>
+			<h3 className="title is-4">
+				All Time ({distanceInWords(now, firstDate)})
+			</h3>
 			<StatisticsRange entries={entries} days={30000} />
 		</div>
 	);
