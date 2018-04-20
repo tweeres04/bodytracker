@@ -19,7 +19,7 @@ function Statistic({ label, latestEntry, firstEntry }) {
 	const displayValue = firstEntry && value > 0 ? `+${value}` : value;
 	const percentage = firstEntry ? _round(value / firstEntry * 100, 2) : null;
 
-	const valueClasses = classnames('title is-3 is-marginless', {
+	const valueClasses = classnames('title is-4 is-marginless', {
 		'has-text-success': firstEntry && value < 0
 	});
 	const tagClasses = classnames('tag is-rounded', {
@@ -49,36 +49,38 @@ function StatisticsRange({ entries, days }) {
 	const firstEntry = entries[index];
 
 	return (
-		<div className="columns is-mobile is-gapless">
-			<Statistic
-				label="Entries"
-				latestEntry={entriesInTimeframe.length}
-			/>
-			<Statistic
-				label="Weight"
-				latestEntry={latestEntry.weight}
-				firstEntry={firstEntry.weight}
-			/>
-			<Statistic
-				label="Waist"
-				latestEntry={latestEntry.waist}
-				firstEntry={firstEntry.waist}
-			/>
-			<Statistic
-				label="Chest"
-				latestEntry={latestEntry.chest}
-				firstEntry={firstEntry.chest}
-			/>
-			<Statistic
-				label="Hips"
-				latestEntry={latestEntry.hips}
-				firstEntry={firstEntry.hips}
-			/>
-			<Statistic
-				label="Bodyfat Percentage"
-				latestEntry={latestEntry.bf}
-				firstEntry={firstEntry.bf}
-			/>
+		<div className="box">
+			<div className="columns is-mobile is-gapless">
+				<Statistic
+					label="Entries"
+					latestEntry={entriesInTimeframe.length}
+				/>
+				<Statistic
+					label="Weight"
+					latestEntry={latestEntry.weight}
+					firstEntry={firstEntry.weight}
+				/>
+				<Statistic
+					label="Waist"
+					latestEntry={latestEntry.waist}
+					firstEntry={firstEntry.waist}
+				/>
+				<Statistic
+					label="Chest"
+					latestEntry={latestEntry.chest}
+					firstEntry={firstEntry.chest}
+				/>
+				<Statistic
+					label="Hips"
+					latestEntry={latestEntry.hips}
+					firstEntry={firstEntry.hips}
+				/>
+				<Statistic
+					label="Bodyfat Percentage"
+					latestEntry={latestEntry.bf}
+					firstEntry={firstEntry.bf}
+				/>
+			</div>
 		</div>
 	);
 }
@@ -120,6 +122,14 @@ export default class Stats extends Component {
 			<Loader />
 		) : (
 			<section className="section">
+				<style>
+					{`.container > .title, .container > div > .title {
+						color: white;
+					}
+					.container > div > .title {
+						margin-bottom: 0.25rem;
+					}`}
+				</style>
 				<div className="container">
 					<h1 className="title">Stats</h1>
 					{entries && entries.length < 1 ? (
