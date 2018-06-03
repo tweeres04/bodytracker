@@ -13,9 +13,7 @@ import _round from 'lodash/round';
 import Loader from './Loader';
 
 function Statistic({ label, latestEntry, firstEntry }) {
-	const value = firstEntry
-		? _round(latestEntry - firstEntry, 2)
-		: latestEntry;
+	const value = firstEntry ? _round(latestEntry - firstEntry, 2) : latestEntry;
 	const displayValue = firstEntry && value > 0 ? `+${value}` : value;
 	const percentage = firstEntry ? _round(value / firstEntry * 100, 2) : null;
 
@@ -51,10 +49,7 @@ function StatisticsRange({ entries, days }) {
 	return (
 		<div className="box">
 			<div className="columns is-mobile is-gapless">
-				<Statistic
-					label="Entries"
-					latestEntry={entriesInTimeframe.length}
-				/>
+				<Statistic label="Entries" latestEntry={entriesInTimeframe.length} />
 				<Statistic
 					label="Weight"
 					latestEntry={latestEntry.weight}
@@ -123,19 +118,14 @@ export default class Stats extends Component {
 		) : (
 			<section className="section">
 				<style>
-					{`.container > .title, .container > div > .title {
-						color: white;
-					}
-					.container > div > .title {
-						margin-bottom: 0.25rem;
+					{`.container > div > .title {
+						margin-bottom: 0.5rem;
 					}`}
 				</style>
 				<div className="container">
 					<h1 className="title">Stats</h1>
 					{entries && entries.length < 1 ? (
-						<div className="box">
-							No entries yet. Add one to get started.
-						</div>
+						<div className="box">No entries yet. Add one to get started.</div>
 					) : (
 						<Statistics entries={entries} />
 					)}
