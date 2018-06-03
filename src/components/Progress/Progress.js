@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import Chartjs from 'chart.js';
 import firebase from 'firebase/app';
 
-import _cloneDeep from 'lodash/fp/cloneDeep';
+import isWithinRange from 'date-fns/is_within_range';
 
-import Loader from './Loader';
+import Loader from '../Loader';
+import ChartControls from './ChartControls';
+import Chart from './Chart';
 
 const colours = [
 	'rgb(50,115,220)',
@@ -20,50 +21,14 @@ const backgroundColours = [
 	'rgba(35,209,96, 0.2)'
 ];
 
-class Chart extends Component {
-	componentDidMount() {
-		const { datasets, times } = this.props;
-		let { yAxes } = this.props;
-
-		yAxes = _cloneDeep(yAxes);
-
-		if (yAxes.length > 1) {
-			yAxes[1].position = 'right';
-		}
-
-		new Chartjs(this.element, {
-			type: 'line',
-			data: {
-				labels: times,
-				datasets
-			},
-			options: {
-				scales: {
-					xAxes: [
-						{
-							type: 'time'
-						}
-					],
-					yAxes
-				}
-			}
-		});
-	}
-	render() {
-		return (
-			<canvas
-				ref={e => {
-					this.element = e;
-				}}
-			/>
-		);
-	}
-}
+const minDate = new Date(1900, 0);
 
 export default class Progress extends Component {
 	state = {
 		loading: true,
-		entries: []
+		entries: [],
+		start: null,
+		end: null
 	};
 	async componentDidMount() {
 		const userPromise = new Promise((resolve, reject) => {
@@ -83,7 +48,16 @@ export default class Progress extends Component {
 		this.setState({ entries, loading: false });
 	}
 	render() {
-		const { loading, entries } = this.state;
+		const { loading, start, end } = this.state;
+		let { entries } = this.state;
+
+		entries =
+			start || end
+				? entries.filter(e =>
+						isWithinRange(e.timestamp, start || minDate, end || new Date())
+				  )
+				: entries;
+
 		const times = entries.map(e => e.timestamp);
 		const weight = entries.map(e => e.weight);
 		const waist = entries.map(e => e.waist);
@@ -153,9 +127,10 @@ export default class Progress extends Component {
 		) : (
 			<section className="section">
 				<div className="container">
+					<h1 className="title">Progress</h1>
+					<ChartControls onDateRangeChange={this.onDateRangeChange} />
 					<div className="columns" key="all">
 						<div className="column">
-							<h1 className="title">Progress</h1>
 							<Chart
 								times={times}
 								datasets={datasets}
@@ -171,9 +146,7 @@ export default class Progress extends Component {
 									times={times}
 									datasets={[d]}
 									yAxes={[
-										d.label == 'Weight'
-											? yAxes.weightAxis
-											: yAxes.otherAxis
+										d.label == 'Weight' ? yAxes.weightAxis : yAxes.otherAxis
 									]}
 								/>
 							</div>
@@ -183,4 +156,7 @@ export default class Progress extends Component {
 			</section>
 		);
 	}
+	onDateRangeChange = statePatch => {
+		this.setState(statePatch);
+	};
 }
