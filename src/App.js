@@ -10,7 +10,7 @@ import BodyTracker from './components/BodyTracker';
 import './App.css';
 
 const Progress = Loadable({
-	loader: () => import('./components/Progress'),
+	loader: () => import('./components/Progress/Progress'),
 	loading: Loader
 });
 
@@ -98,19 +98,13 @@ class App extends Component {
 								{user != 'loading' &&
 									user &&
 									user.isAnonymous && (
-										<Link
-											to="/signin"
-											className="navbar-item"
-										>
+										<Link to="/signin" className="navbar-item">
 											Sign In
 										</Link>
 									)}
 								{user &&
 									!user.isAnonymous && (
-										<a
-											className="navbar-item"
-											onClick={this.logout}
-										>
+										<a className="navbar-item" onClick={this.logout}>
 											Logout
 										</a>
 									)}
@@ -128,17 +122,11 @@ class App extends Component {
 								<p>&copy; 2018 Tweeres Software</p>
 								<p>
 									Icon made by{' '}
-									<a
-										href="http://www.freepik.com"
-										title="Freepik"
-									>
+									<a href="http://www.freepik.com" title="Freepik">
 										Freepik
 									</a>{' '}
 									from{' '}
-									<a
-										href="https://www.flaticon.com/"
-										title="Flaticon"
-									>
+									<a href="https://www.flaticon.com/" title="Flaticon">
 										flaticon.com
 									</a>
 								</p>
