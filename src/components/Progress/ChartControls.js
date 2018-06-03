@@ -8,11 +8,17 @@ const datepickerCommonProps = {
 	}
 };
 
-function StartDatepicker({ start, onDateChange }) {
+function MobileLabel({ label }) {
+	return <label className="label">{label}</label>;
+}
+
+function StartDatepicker({ start, onDateChange, mobile }) {
+	const label = 'Start date';
 	return (
 		<div className="control">
+			{mobile && <MobileLabel label={label} />}
 			<Flatpickr
-				placeholder="Start date"
+				placeholder={label}
 				value={start}
 				onChange={([start]) => {
 					onDateChange(start, 'start');
@@ -23,11 +29,13 @@ function StartDatepicker({ start, onDateChange }) {
 	);
 }
 
-function EndDatepicker({ end, onDateChange }) {
+function EndDatepicker({ end, onDateChange, mobile }) {
+	const label = 'End date';
 	return (
 		<div className="control">
+			{mobile && <MobileLabel label={label} />}
 			<Flatpickr
-				placeholder="End date"
+				placeholder={label}
 				value={end}
 				onChange={([end]) => {
 					onDateChange(end, 'end');
@@ -71,18 +79,30 @@ export default class ChartControls extends Component {
 					/>
 				</div>
 				<div className="is-hidden-tablet">
-					<div className="field">
-						<StartDatepicker onDateChange={this.onDateChange} start={start} />
-					</div>
-					<div className="field">
-						<EndDatepicker onDateChange={this.onDateChange} end={end} />
-					</div>
-					<div className="field">
-						<ResetButton
-							start={start}
-							end={end}
-							resetDateRange={this.resetDateRange}
-						/>
+					<div className="columns">
+						<div className="column">
+							<div className="field">
+								<StartDatepicker
+									onDateChange={this.onDateChange}
+									start={start}
+									mobile={true}
+								/>
+							</div>
+							<div className="field">
+								<EndDatepicker
+									onDateChange={this.onDateChange}
+									end={end}
+									mobile={true}
+								/>
+							</div>
+							<div className="field">
+								<ResetButton
+									start={start}
+									end={end}
+									resetDateRange={this.resetDateRange}
+								/>
+							</div>
+						</div>
 					</div>
 				</div>
 			</Fragment>
