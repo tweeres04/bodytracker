@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import firebase from 'firebase/app';
 
 import isWithinRange from 'date-fns/is_within_range';
+import endOfDay from 'date-fns/end_of_day';
 
 import Loader from '../Loader';
 import ChartControls from './ChartControls';
@@ -54,7 +55,11 @@ export default class Progress extends Component {
 		entries =
 			start || end
 				? entries.filter(e =>
-						isWithinRange(e.timestamp, start || minDate, end || new Date())
+						isWithinRange(
+							e.timestamp,
+							start || minDate,
+							endOfDay(end || new Date())
+						)
 				  )
 				: entries;
 
