@@ -65,6 +65,18 @@ export default class ChartControls extends Component {
 		start: null,
 		end: null
 	};
+	componentDidMount() {
+		let { start, end } =
+			JSON.parse(localStorage.getItem('chartControlsState')) || {};
+		this.setState({
+			start: start && new Date(start),
+			end: end && new Date(end)
+		});
+	}
+	componentDidUpdate() {
+		const { start, end } = this.state;
+		localStorage.setItem('chartControlsState', JSON.stringify({ start, end }));
+	}
 	render() {
 		const { start, end } = this.state;
 		return (
