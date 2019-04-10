@@ -66,12 +66,14 @@ export default class ChartControls extends Component {
 		end: null
 	};
 	componentDidMount() {
+		const { onDateRangeChange } = this.props;
 		let { start, end } =
 			JSON.parse(localStorage.getItem('chartControlsState')) || {};
 		this.setState({
 			start: start && new Date(start),
 			end: end && new Date(end)
 		});
+		onDateRangeChange({ start, end });
 	}
 	componentDidUpdate() {
 		const { start, end } = this.state;
