@@ -24,6 +24,11 @@ const Stats = Loadable({
 	loading: Loader
 });
 
+const Settings = Loadable({
+	loader: () => import('./components/Settings'),
+	loading: Loader
+});
+
 const Signin = Loadable({
 	loader: () => import('./components/Signin'),
 	loading: Loader
@@ -93,6 +98,9 @@ class App extends Component {
 								<Link to="/history" className="navbar-item">
 									History
 								</Link>
+								<Link to="/settings" className="navbar-item">
+									Settings
+								</Link>
 							</div>
 							<div className="navbar-end">
 								{user != 'loading' &&
@@ -115,6 +123,7 @@ class App extends Component {
 					<Route path="/stats" component={Stats} />
 					<Route path="/progress" component={Progress} />
 					<Route path="/history" component={History} />
+					<Route path="/settings" component={Settings} />
 					<Route path="/signin" component={Signin} />
 					<footer className="footer">
 						<div className="container">
