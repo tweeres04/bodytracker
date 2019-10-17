@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import firebase from 'firebase/app';
 
-import isWithinRange from 'date-fns/is_within_range';
-import endOfDay from 'date-fns/end_of_day';
+import isWithinInterval from 'date-fns/isWithinInterval';
+import endOfDay from 'date-fns/endOfDay';
 
 import Loader from '../Loader';
 import ChartControls from './ChartControls';
@@ -52,18 +52,19 @@ export default class Progress extends Component {
 		const { loading, start, end } = this.state;
 		let { entries } = this.state;
 
+		const interval = {
+			start: start || minDate,
+			end: endOfDay(end || new Date())
+		};
+
 		entries =
 			start || end
 				? entries.filter(e =>
-						isWithinRange(
-							e.timestamp,
-							start || minDate,
-							endOfDay(end || new Date())
-						)
+						isWithinInterval(new Date(e.timestamp.seconds * 1000), interval)
 				  )
 				: entries;
 
-		const times = entries.map(e => e.timestamp);
+		const times = entries.map(e => new Date(e.timestamp.seconds * 1000));
 		const weight = entries.map(e => e.weight);
 		const waist = entries.map(e => e.waist);
 		const chest = entries.map(e => e.chest);

@@ -1,5 +1,5 @@
 import React from 'react';
-import firebase from 'firebase';
+import firebase from 'firebase/app';
 import FirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 
 export default function Signin() {
@@ -17,27 +17,18 @@ export default function Signin() {
 				signInSuccessUrl: '/',
 				callbacks: {
 					signInFailure: async err => {
-						if (
-							err.code ==
-							'firebaseui/anonymous-upgrade-merge-conflict'
-						) {
+						if (err.code == 'firebaseui/anonymous-upgrade-merge-conflict') {
 							const firestore = firebase.firestore();
 							const anonymousUser = firebase.auth().currentUser;
 							const cred = err.credential;
 
 							const querySnapshot = await firestore
-								.collection(
-									`users/${anonymousUser.uid}/entries`
-								)
+								.collection(`users/${anonymousUser.uid}/entries`)
 								.get();
 							const documentSnapshots = querySnapshot.docs || [];
-							const entries = documentSnapshots.map(d =>
-								d.data()
-							);
+							const entries = documentSnapshots.map(d => d.data());
 
-							const newUser = await firebase
-								.auth()
-								.signInWithCredential(cred);
+							const newUser = await firebase.auth().signInWithCredential(cred);
 
 							if (entries.length > 0) {
 								const batch = firestore.batch();
@@ -51,17 +42,9 @@ export default function Signin() {
 								});
 
 								await batch.commit();
-								console.log(
-									'Data migrated from',
-									anonymousUser,
-									'to',
-									newUser
-								);
+								console.log('Data migrated from', anonymousUser, 'to', newUser);
 							} else {
-								console.log(
-									'No data to migrate. Signed in as ',
-									newUser
-								);
+								console.log('No data to migrate. Signed in as ', newUser);
 							}
 							await anonymousUser.delete();
 							window.location = '/';

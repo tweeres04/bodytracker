@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
-import firebase from 'firebase';
+import firebase from 'firebase/app';
 import Loadable from 'react-loadable';
 import classnames from 'classnames';
 
@@ -95,19 +95,16 @@ class App extends Component {
 								</Link>
 							</div>
 							<div className="navbar-end">
-								{user != 'loading' &&
-									user &&
-									user.isAnonymous && (
-										<Link to="/signin" className="navbar-item">
-											Sign In
-										</Link>
-									)}
-								{user &&
-									!user.isAnonymous && (
-										<a className="navbar-item" onClick={this.logout}>
-											Logout
-										</a>
-									)}
+								{user != 'loading' && user && user.isAnonymous && (
+									<Link to="/signin" className="navbar-item">
+										Sign In
+									</Link>
+								)}
+								{user && !user.isAnonymous && (
+									<a className="navbar-item" onClick={this.logout}>
+										Logout
+									</a>
+								)}
 							</div>
 						</div>
 					</div>
@@ -119,7 +116,7 @@ class App extends Component {
 					<footer className="footer">
 						<div className="container">
 							<div className="content has-text-centered">
-								<p>&copy; 2018 Tweeres Software</p>
+								<p>&copy; Tyler Weeres</p>
 								<p>
 									Icon made by{' '}
 									<a href="http://www.freepik.com" title="Freepik">

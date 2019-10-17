@@ -143,7 +143,7 @@ export default class BodyTracker extends Component {
 				<div className="container">
 					<div className="columns">
 						<div className="column">
-							<h1 className="title">Body Tracker</h1>
+							<h1 className="title">Bodytracker</h1>
 							<BodyTrackerDateField
 								label="Date and Time"
 								name="timestamp"

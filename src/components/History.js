@@ -17,6 +17,7 @@ function EntryListItem({
 	bf,
 	remove
 }) {
+	timestamp = new Date(timestamp.seconds * 1000);
 	return (
 		<div className="box">
 			<div className="level is-mobile">
@@ -26,7 +27,7 @@ function EntryListItem({
 							<h1 className="title is-5 is-spaced">
 								{timestamp.toDateString()}
 							</h1>
-							<div>{dateFormat(timestamp, 'h:mm A')}</div>
+							<div>{dateFormat(timestamp, 'h:mm a')}</div>
 							{weight && <div>Weight: {weight}</div>}
 							{waist && <div>Waist: {waist}</div>}
 							{chest && <div>Chest: {chest}</div>}
@@ -72,10 +73,7 @@ function UndoDeleteAlert({ undoDelete }) {
 				</div>
 				<div className="level-right">
 					<div className="level-item">
-						<button
-							onClick={undoDelete}
-							className="button is-inverted is-info"
-						>
+						<button onClick={undoDelete} className="button is-inverted is-info">
 							Undo
 						</button>
 					</div>
@@ -106,36 +104,26 @@ export default class History extends Component {
 		const { entries, undoDeleteAlert } = this.state;
 		const entrylistItems = entries
 			? entries.map(e => (
-					<EntryListItem
-						remove={this.removeEntry}
-						key={e.id}
-						{...e}
-					/>
-				))
+					<EntryListItem remove={this.removeEntry} key={e.id} {...e} />
+			  ))
 			: [];
 		return (
 			<section className="section">
 				<div className="container">
-					<h1 className="title">History</h1>
+					<h1 className="title">
+						History {entries && <span className="tag">{entries.length}</span>}
+					</h1>
 					{entries ? (
-						<Infinite
-							useWindowAsScrollContainer={true}
-							elementHeight={136}
-						>
+						<Infinite useWindowAsScrollContainer={true} elementHeight={136}>
 							{entrylistItems}
 						</Infinite>
 					) : (
 						<Loader />
 					)}
-					{entries &&
-						entries.length < 1 && (
-							<div className="box">
-								No entries yet. Add one to get started.
-							</div>
-						)}
-					{undoDeleteAlert && (
-						<UndoDeleteAlert undoDelete={this.undo} />
+					{entries && entries.length < 1 && (
+						<div className="box">No entries yet. Add one to get started.</div>
 					)}
+					{undoDeleteAlert && <UndoDeleteAlert undoDelete={this.undo} />}
 				</div>
 			</section>
 		);

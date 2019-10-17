@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import firebase from 'firebase';
+import firebase from 'firebase/app';
 import classnames from 'classnames';
 
-import dateAddDays from 'date-fns/add_days';
-import dateClosestIndexTo from 'date-fns/closest_index_to';
-import dateIsAfter from 'date-fns/is_after';
-import startOfDay from 'date-fns/start_of_day';
-import distanceInWords from 'date-fns/distance_in_words';
+import dateAddDays from 'date-fns/addDays';
+import dateClosestIndexTo from 'date-fns/closestIndexTo';
+import dateIsAfter from 'date-fns/isAfter';
+import startOfDay from 'date-fns/startOfDay';
+import formatDistance from 'date-fns/formatDistance';
 
 import _round from 'lodash/round';
 
@@ -15,7 +15,7 @@ import Loader from './Loader';
 function Statistic({ label, latestEntry, firstEntry }) {
 	const value = firstEntry ? _round(latestEntry - firstEntry, 2) : latestEntry;
 	const displayValue = firstEntry && value > 0 ? `+${value}` : value;
-	const percentage = firstEntry ? _round(value / firstEntry * 100, 2) : null;
+	const percentage = firstEntry ? _round((value / firstEntry) * 100, 2) : null;
 
 	const valueClasses = classnames('title is-4 is-marginless', {
 		'has-text-success': firstEntry && value < 0
@@ -38,11 +38,11 @@ function StatisticsRange({ entries, days }) {
 	const beginningOfTimeframe = startOfDay(dateAddDays(today, -days));
 	const latestEntry = entries[0];
 	const entriesInTimeframe = entries.filter(e =>
-		dateIsAfter(e.timestamp, beginningOfTimeframe)
+		dateIsAfter(new Date(e.timestamp.seconds * 1000), beginningOfTimeframe)
 	);
 	const index = dateClosestIndexTo(
 		beginningOfTimeframe,
-		entriesInTimeframe.map(e => e.timestamp)
+		entriesInTimeframe.map(e => new Date(e.timestamp.seconds * 1000))
 	);
 	const firstEntry = entries[index];
 
@@ -81,7 +81,9 @@ function StatisticsRange({ entries, days }) {
 }
 
 function Statistics({ entries }) {
-	const firstDate = entries[entries.length - 1].timestamp;
+	const firstDate = new Date(
+		entries[entries.length - 1].timestamp.seconds * 1000
+	);
 	const now = new Date();
 	return (
 		<div>
@@ -90,7 +92,7 @@ function Statistics({ entries }) {
 			<h3 className="title is-4">Past Month</h3>
 			<StatisticsRange entries={entries} days={30} />
 			<h3 className="title is-4">
-				All Time ({distanceInWords(now, firstDate)})
+				All Time ({formatDistance(now, firstDate)})
 			</h3>
 			<StatisticsRange entries={entries} days={30000} />
 		</div>
