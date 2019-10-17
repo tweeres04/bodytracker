@@ -4,6 +4,8 @@ import firebase from 'firebase/app';
 import isWithinInterval from 'date-fns/isWithinInterval';
 import endOfDay from 'date-fns/endOfDay';
 
+import _range from 'lodash/range';
+
 import Loader from '../Loader';
 import ChartControls from './ChartControls';
 import Chart from './Chart';
@@ -70,6 +72,25 @@ export default class Progress extends Component {
 		const chest = entries.map(e => e.chest);
 		const hips = entries.map(e => e.hips);
 		const bf = entries.map(e => e.bf);
+
+		const movingAverageInterval = 60;
+
+		const weightMovingAverageDataset = {
+			label: 'Weight',
+			data: weight.map((w, i) =>
+				i < movingAverageInterval || (i % 10 !== 0 && i !== weight.length - 1)
+					? null
+					: _range(i - movingAverageInterval, i).reduce(
+							(sum, i) => sum + weight[i],
+							0
+					  ) / movingAverageInterval
+			),
+			borderColor: colours[1],
+			backgroundColor: backgroundColours[0],
+			yAxisID: 'weight-axis',
+			spanGaps: true,
+			pointRadius: 0
+		};
 
 		const datasets = [
 			{
@@ -150,7 +171,9 @@ export default class Progress extends Component {
 								<h2 className="title is-5">{d.label}</h2>
 								<Chart
 									times={times}
-									datasets={[d]}
+									datasets={
+										d.label === 'Weight' ? [d, weightMovingAverageDataset] : [d]
+									}
 									yAxes={[
 										d.label == 'Weight' ? yAxes.weightAxis : yAxes.otherAxis
 									]}
