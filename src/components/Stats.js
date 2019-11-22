@@ -24,7 +24,7 @@ function Statistic({ label, latestEntry, firstEntry }) {
 		'is-success': firstEntry && value < 0
 	});
 
-	return value ? (
+	return value !== undefined ? (
 		<div className="column has-text-centered">
 			<div className="heading has-text-grey-light">{label}</div>
 			<div className={valueClasses}>{displayValue}</div>
@@ -91,6 +91,12 @@ function Statistics({ entries }) {
 			<StatisticsRange entries={entries} days={7} />
 			<h3 className="title is-4">Past Month</h3>
 			<StatisticsRange entries={entries} days={30} />
+			<h3 className="title is-4">Past 3 Months</h3>
+			<StatisticsRange entries={entries} days={91} />
+			<h3 className="title is-4">Past 6 Months</h3>
+			<StatisticsRange entries={entries} days={182} />
+			<h3 className="title is-4">Past Year</h3>
+			<StatisticsRange entries={entries} days={365} />
 			<h3 className="title is-4">
 				All Time ({formatDistance(now, firstDate)})
 			</h3>
