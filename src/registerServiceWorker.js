@@ -11,11 +11,8 @@ function NewContentNotification() {
 				width: '100%'
 			}}
 			className="notification is-info"
-			onClick={() => {
-				window.location.reload();
-			}}
 		>
-			A new version of Bodytracker is available. Tap here to refresh.
+			A new version of Bodytracker is available. Close all tabs and reopen to update.
 		</div>
 	);
 }

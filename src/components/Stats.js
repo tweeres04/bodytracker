@@ -15,7 +15,7 @@ import Loader from './Loader';
 function Statistic({ label, latestEntry, firstEntry }) {
 	const value = firstEntry ? _round(latestEntry - firstEntry, 2) : latestEntry;
 	const displayValue = firstEntry && value > 0 ? `+${value}` : value;
-	const percentage = firstEntry ? _round((value / firstEntry) * 100, 2) : null;
+	const percentage = firstEntry ? _round(value / firstEntry * 100, 2) : null;
 
 	const valueClasses = classnames('title is-4 is-marginless', {
 		'has-text-success': firstEntry && value < 0
@@ -28,7 +28,7 @@ function Statistic({ label, latestEntry, firstEntry }) {
 		<div className="column has-text-centered">
 			<div className="heading has-text-grey-light">{label}</div>
 			<div className={valueClasses}>{displayValue}</div>
-			{percentage && <div className={tagClasses}>{percentage}%</div>}
+			{percentage !== null && <div className={tagClasses}>{percentage}%</div>}
 		</div>
 	) : null;
 }
