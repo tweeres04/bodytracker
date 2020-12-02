@@ -31,8 +31,7 @@
 		"build": "react-scripts build",
 		"test": "react-scripts test --env=jsdom",
 		"eject": "react-scripts eject",
-		"deploy": "yarn build && firebase deploy",
-		"deployconfig": "scp etc/bodytracker root@tweeres.ca:/etc/nginx/sites-available && ssh root@tweeres.ca 'nginx -s reload'"
+		"deploy": "yarn build && firebase deploy"
 	},
 	"browserslist": {
 		"production": [
