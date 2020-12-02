@@ -14,14 +14,14 @@ const colours = [
 	'rgb(50,115,220)',
 	'rgb(255,56,96)',
 	'rgb(255,221,87)',
-	'rgb(35,209,96)'
+	'rgb(35,209,96)',
 ];
 
 const backgroundColours = [
 	'rgba(50,115,220, 0.2)',
 	'rgba(255,56,96, 0.2)',
 	'rgba(255,221,87, 0.2)',
-	'rgba(35,209,96, 0.2)'
+	'rgba(35,209,96, 0.2)',
 ];
 
 const minDate = new Date(1900, 0);
@@ -31,11 +31,11 @@ export default class Progress extends Component {
 		loading: true,
 		entries: [],
 		start: null,
-		end: null
+		end: null,
 	};
 	async componentDidMount() {
 		const userPromise = new Promise((resolve, reject) => {
-			firebase.auth().onAuthStateChanged(user => {
+			firebase.auth().onAuthStateChanged((user) => {
 				if (user) {
 					resolve(user);
 				}
@@ -47,7 +47,7 @@ export default class Progress extends Component {
 			.collection(`users/${uid}/entries`)
 			.orderBy('timestamp')
 			.get();
-		const entries = querySnapshot.docs.map(ds => ds.data());
+		const entries = querySnapshot.docs.map((ds) => ds.data());
 		this.setState({ entries, loading: false });
 	}
 	render() {
@@ -56,40 +56,56 @@ export default class Progress extends Component {
 
 		const interval = {
 			start: start || minDate,
-			end: endOfDay(end || new Date())
+			end: endOfDay(end || new Date()),
 		};
 
 		entries =
 			start || end
-				? entries.filter(e =>
+				? entries.filter((e) =>
 						isWithinInterval(new Date(e.timestamp.seconds * 1000), interval)
 				  )
 				: entries;
 
-		const times = entries.map(e => new Date(e.timestamp.seconds * 1000));
-		const weight = entries.map(e => e.weight);
-		const waist = entries.map(e => e.waist);
-		const chest = entries.map(e => e.chest);
-		const hips = entries.map(e => e.hips);
-		const bf = entries.map(e => e.bf);
+		const times = entries.map((e) => new Date(e.timestamp.seconds * 1000));
+		const weight = entries.map((e) => e.weight);
+		const waist = entries.map((e) => e.waist);
+		const chest = entries.map((e) => e.chest);
+		const hips = entries.map((e) => e.hips);
+		const bf = entries.map((e) => e.bf);
 
-		const movingAverageInterval = 60;
+		const movingAverageInterval = 30;
+		const movingAverageSampleInterval = 14; // Plot one of every n entries to smooth the line
 
 		const weightMovingAverageDataset = {
-			label: 'Weight',
+			label: `Weight (${movingAverageInterval} Entry Average)`,
 			data: weight.map((w, i) =>
-				i < movingAverageInterval || (i % 10 !== 0 && i !== weight.length - 1)
+				i < movingAverageInterval ||
+				(i % movingAverageSampleInterval !== 0 && i !== weight.length - 1)
 					? null
 					: _range(i - movingAverageInterval, i).reduce(
 							(sum, i) => sum + weight[i],
 							0
 					  ) / movingAverageInterval
 			),
-			borderColor: colours[1],
-			backgroundColor: backgroundColours[0],
 			yAxisID: 'weight-axis',
 			spanGaps: true,
-			pointRadius: 0
+			pointRadius: 0,
+		};
+
+		const waistMovingAverageDataset = {
+			label: `Waist (${movingAverageInterval} Entry Average)`,
+			data: waist.map((w, i) =>
+				i < movingAverageInterval ||
+				(i % movingAverageSampleInterval !== 0 && i !== waist.length - 1)
+					? null
+					: _range(i - movingAverageInterval, i).reduce(
+							(sum, i) => sum + waist[i],
+							0
+					  ) / movingAverageInterval
+			),
+			yAxisID: 'other-axis',
+			spanGaps: true,
+			pointRadius: 0,
 		};
 
 		const datasets = [
@@ -100,7 +116,7 @@ export default class Progress extends Component {
 				backgroundColor: backgroundColours[0],
 				yAxisID: 'weight-axis',
 				lineTension: 0,
-				spanGaps: true
+				spanGaps: true,
 			},
 			{
 				label: 'Waist',
@@ -109,7 +125,7 @@ export default class Progress extends Component {
 				backgroundColor: backgroundColours[1],
 				yAxisID: 'other-axis',
 				lineTension: 0,
-				spanGaps: true
+				spanGaps: true,
 			},
 			{
 				label: 'Chest',
@@ -118,7 +134,7 @@ export default class Progress extends Component {
 				backgroundColor: backgroundColours[2],
 				yAxisID: 'other-axis',
 				lineTension: 0,
-				spanGaps: true
+				spanGaps: true,
 			},
 			{
 				label: 'Hips',
@@ -127,7 +143,7 @@ export default class Progress extends Component {
 				backgroundColor: backgroundColours[3],
 				yAxisID: 'other-axis',
 				lineTension: 0,
-				spanGaps: true
+				spanGaps: true,
 			},
 			{
 				label: 'Bodyfat %',
@@ -136,17 +152,17 @@ export default class Progress extends Component {
 				backgroundColor: backgroundColours[0],
 				yAxisID: 'other-axis',
 				lineTension: 0,
-				spanGaps: true
-			}
+				spanGaps: true,
+			},
 		];
 
 		const yAxes = {
 			weightAxis: {
-				id: 'weight-axis'
+				id: 'weight-axis',
 			},
 			otherAxis: {
-				id: 'other-axis'
-			}
+				id: 'other-axis',
+			},
 		};
 
 		return loading ? (
@@ -165,17 +181,21 @@ export default class Progress extends Component {
 							/>
 						</div>
 					</div>
-					{datasets.map(d => (
+					{datasets.map((d) => (
 						<div className="columns" key={d.label}>
 							<div className="column">
 								<h2 className="title is-5">{d.label}</h2>
 								<Chart
 									times={times}
 									datasets={
-										d.label === 'Weight' ? [d, weightMovingAverageDataset] : [d]
+										d.label === 'Weight'
+											? [d, weightMovingAverageDataset]
+											: d.label === 'Waist'
+											? [d, waistMovingAverageDataset]
+											: [d]
 									}
 									yAxes={[
-										d.label == 'Weight' ? yAxes.weightAxis : yAxes.otherAxis
+										d.label == 'Weight' ? yAxes.weightAxis : yAxes.otherAxis,
 									]}
 								/>
 							</div>
@@ -185,7 +205,7 @@ export default class Progress extends Component {
 			</section>
 		);
 	}
-	onDateRangeChange = statePatch => {
+	onDateRangeChange = (statePatch) => {
 		this.setState(statePatch);
 	};
 }
