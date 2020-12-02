@@ -33,7 +33,7 @@ function Statistic({ label, latestEntry, firstEntry }) {
 	) : null;
 }
 
-function StatisticsRange({ entries, days }) {
+function StatisticsRange({ title, entries, days }) {
 	const today = new Date();
 	const beginningOfTimeframe = startOfDay(dateAddDays(today, -days));
 	const latestEntry = entries[0];
@@ -46,7 +46,9 @@ function StatisticsRange({ entries, days }) {
 	);
 	const firstEntry = entries[index];
 
-	return (
+	return entriesInTimeframe.length > 0 ? (
+		<>
+			<h3 className="title is-4">{title}</h3>
 		<div className="box">
 			<div className="columns is-mobile is-gapless">
 				<Statistic label="Entries" latestEntry={entriesInTimeframe.length} />
@@ -77,7 +79,8 @@ function StatisticsRange({ entries, days }) {
 				/>
 			</div>
 		</div>
-	);
+		</>
+	) : null;
 }
 
 function Statistics({ entries }) {
@@ -87,16 +90,11 @@ function Statistics({ entries }) {
 	const now = new Date();
 	return (
 		<div>
-			<h3 className="title is-4">Past Week</h3>
-			<StatisticsRange entries={entries} days={7} />
-			<h3 className="title is-4">Past Month</h3>
-			<StatisticsRange entries={entries} days={30} />
-			<h3 className="title is-4">Past 3 Months</h3>
-			<StatisticsRange entries={entries} days={91} />
-			<h3 className="title is-4">Past 6 Months</h3>
-			<StatisticsRange entries={entries} days={182} />
-			<h3 className="title is-4">Past Year</h3>
-			<StatisticsRange entries={entries} days={365} />
+			<StatisticsRange title="Past Week" entries={entries} days={7} />
+			<StatisticsRange title="Past Month" entries={entries} days={30} />
+			<StatisticsRange title="Past 3 Months" entries={entries} days={91} />
+			<StatisticsRange title="Past 6 Months" entries={entries} days={182} />
+			<StatisticsRange title="Past Year" entries={entries} days={365} />
 			<h3 className="title is-4">
 				All Time ({formatDistance(now, firstDate)})
 			</h3>
