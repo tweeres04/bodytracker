@@ -73,8 +73,8 @@ export default class Progress extends Component {
 		const hips = entries.map((e) => e.hips);
 		const bf = entries.map((e) => e.bf);
 
-		const movingAverageInterval = 30;
-		const movingAverageSampleInterval = 14; // Plot one of every n entries to smooth the line
+		const movingAverageInterval = Math.round(entries.length / 5);
+		const movingAverageSampleInterval = Math.round(Math.log2(entries.length)); // Plot one of every n entries to smooth the line
 
 		const weightMovingAverageDataset = {
 			label: `Weight (${movingAverageInterval} Entry Average)`,
