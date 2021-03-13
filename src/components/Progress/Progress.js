@@ -76,36 +76,38 @@ export default class Progress extends Component {
 		const movingAverageInterval = Math.round(entries.length / 5);
 		const movingAverageSampleInterval = Math.round(Math.log2(entries.length)); // Plot one of every n entries to smooth the line
 
+		const weightMovingAverageRemainder =
+			(weight.length - 1) % movingAverageSampleInterval;
 		const weightMovingAverageDataset = {
 			label: `Weight (${movingAverageInterval} Entry Average)`,
 			data: weight.map((w, i) =>
 				i < movingAverageInterval ||
-				(i % movingAverageSampleInterval !== 0 && i !== weight.length - 1)
+				i % movingAverageSampleInterval !== weightMovingAverageRemainder
 					? null
-					: _range(i - movingAverageInterval, i).reduce(
+					: _range(i - movingAverageInterval + 1, i + 1).reduce(
 							(sum, i) => sum + weight[i],
 							0
 					  ) / movingAverageInterval
 			),
 			yAxisID: 'weight-axis',
 			spanGaps: true,
-			pointRadius: 0,
 		};
 
+		const waistMovingAverageRemainder =
+			(waist.length - 1) % movingAverageSampleInterval;
 		const waistMovingAverageDataset = {
 			label: `Waist (${movingAverageInterval} Entry Average)`,
 			data: waist.map((w, i) =>
 				i < movingAverageInterval ||
-				(i % movingAverageSampleInterval !== 0 && i !== waist.length - 1)
+				i % movingAverageSampleInterval !== waistMovingAverageRemainder
 					? null
-					: _range(i - movingAverageInterval, i).reduce(
+					: _range(i - movingAverageInterval + 1, i + 1).reduce(
 							(sum, i) => sum + waist[i],
 							0
 					  ) / movingAverageInterval
 			),
 			yAxisID: 'other-axis',
 			spanGaps: true,
-			pointRadius: 0,
 		};
 
 		const datasets = [
