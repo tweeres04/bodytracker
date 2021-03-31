@@ -7,6 +7,7 @@ import dateClosestIndexTo from 'date-fns/closestIndexTo';
 import dateIsAfter from 'date-fns/isAfter';
 import startOfDay from 'date-fns/startOfDay';
 import formatDistance from 'date-fns/formatDistance';
+import format from 'date-fns/format';
 
 import _round from 'lodash/round';
 
@@ -15,13 +16,13 @@ import Loader from './Loader';
 function Statistic({ label, latestEntry, firstEntry }) {
 	const value = firstEntry ? _round(latestEntry - firstEntry, 2) : latestEntry;
 	const displayValue = firstEntry && value > 0 ? `+${value}` : value;
-	const percentage = firstEntry ? _round(value / firstEntry * 100, 2) : null;
+	const percentage = firstEntry ? _round((value / firstEntry) * 100, 2) : null;
 
 	const valueClasses = classnames('title is-4 is-marginless', {
-		'has-text-success': firstEntry && value < 0
+		'has-text-success': firstEntry && value < 0,
 	});
 	const tagClasses = classnames('tag is-rounded', {
-		'is-success': firstEntry && value < 0
+		'is-success': firstEntry && value < 0,
 	});
 
 	return value !== undefined ? (
@@ -37,48 +38,51 @@ function StatisticsRange({ title, entries, days }) {
 	const today = new Date();
 	const beginningOfTimeframe = startOfDay(dateAddDays(today, -days));
 	const latestEntry = entries[0];
-	const entriesInTimeframe = entries.filter(e =>
-		dateIsAfter(new Date(e.timestamp.seconds * 1000), beginningOfTimeframe)
+	const entriesInTimeframe = entries.filter((e) =>
+		dateIsAfter(e.timestamp.toDate(), beginningOfTimeframe)
 	);
 	const index = dateClosestIndexTo(
 		beginningOfTimeframe,
-		entriesInTimeframe.map(e => new Date(e.timestamp.seconds * 1000))
+		entriesInTimeframe.map((e) => e.timestamp.toDate())
 	);
 	const firstEntry = entries[index];
 
 	return entriesInTimeframe.length > 0 ? (
 		<>
 			<h3 className="title is-4">{title}</h3>
-		<div className="box">
-			<div className="columns is-mobile is-gapless">
-				<Statistic label="Entries" latestEntry={entriesInTimeframe.length} />
-				<Statistic
-					label="Weight"
-					latestEntry={latestEntry.weight}
-					firstEntry={firstEntry.weight}
-				/>
-				<Statistic
-					label="Waist"
-					latestEntry={latestEntry.waist}
-					firstEntry={firstEntry.waist}
-				/>
-				<Statistic
-					label="Chest"
-					latestEntry={latestEntry.chest}
-					firstEntry={firstEntry.chest}
-				/>
-				<Statistic
-					label="Hips"
-					latestEntry={latestEntry.hips}
-					firstEntry={firstEntry.hips}
-				/>
-				<Statistic
-					label="Bodyfat Percentage"
-					latestEntry={latestEntry.bf}
-					firstEntry={firstEntry.bf}
-				/>
+			<h5 className="subtitle is-7">
+				(Since {format(firstEntry.timestamp.toDate(), 'E LLL d y')})
+			</h5>
+			<div className="box">
+				<div className="columns is-mobile is-gapless">
+					<Statistic label="Entries" latestEntry={entriesInTimeframe.length} />
+					<Statistic
+						label="Weight"
+						latestEntry={latestEntry.weight}
+						firstEntry={firstEntry.weight}
+					/>
+					<Statistic
+						label="Waist"
+						latestEntry={latestEntry.waist}
+						firstEntry={firstEntry.waist}
+					/>
+					<Statistic
+						label="Chest"
+						latestEntry={latestEntry.chest}
+						firstEntry={firstEntry.chest}
+					/>
+					<Statistic
+						label="Hips"
+						latestEntry={latestEntry.hips}
+						firstEntry={firstEntry.hips}
+					/>
+					<Statistic
+						label="Bodyfat Percentage"
+						latestEntry={latestEntry.bf}
+						firstEntry={firstEntry.bf}
+					/>
+				</div>
 			</div>
-		</div>
 		</>
 	) : null;
 }
@@ -89,7 +93,7 @@ function Statistics({ entries }) {
 	);
 	const now = new Date();
 	return (
-		<div>
+		<>
 			<StatisticsRange title="Past Week" entries={entries} days={7} />
 			<StatisticsRange title="Past Month" entries={entries} days={30} />
 			<StatisticsRange title="Past 3 Months" entries={entries} days={91} />
@@ -99,13 +103,13 @@ function Statistics({ entries }) {
 				All Time ({formatDistance(now, firstDate)})
 			</h3>
 			<StatisticsRange entries={entries} days={30000} />
-		</div>
+		</>
 	);
 }
 
 export default class Stats extends Component {
 	state = {
-		entries: 'loading'
+		entries: 'loading',
 	};
 	async componentDidMount() {
 		await new Promise((resolve, reject) => {
@@ -147,7 +151,7 @@ export default class Stats extends Component {
 			.orderBy('timestamp', 'desc')
 			.get();
 
-		const entries = querySnapshot.docs.map(d =>
+		const entries = querySnapshot.docs.map((d) =>
 			Object.assign(d.data(), { id: d.id })
 		);
 
