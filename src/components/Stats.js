@@ -49,11 +49,11 @@ function StatisticsRange({ title, entries, days }) {
 
 	return entriesInTimeframe.length > 0 ? (
 		<>
-			<h3 className="title is-4">{title}</h3>
-			<h5 className="subtitle is-7">
-				(Since {format(firstEntry.timestamp.toDate(), 'E LLL d y')})
-			</h5>
 			<div className="box">
+				<h3 className="title is-4">{title}</h3>
+				<h5 className="subtitle is-7">
+					(Since {format(firstEntry.timestamp.toDate(), 'E LLL d y')})
+				</h5>
 				<div className="columns is-mobile is-gapless">
 					<Statistic label="Entries" latestEntry={entriesInTimeframe.length} />
 					<Statistic
@@ -127,11 +127,6 @@ export default class Stats extends Component {
 			<Loader />
 		) : (
 			<section className="section">
-				<style>
-					{`.container > div > .title {
-						margin-bottom: 0.5rem;
-					}`}
-				</style>
 				<div className="container">
 					<h1 className="title">Stats</h1>
 					{entries && entries.length < 1 ? (
