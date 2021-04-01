@@ -4,6 +4,7 @@ import firebase from 'firebase/app';
 import Loadable from 'react-loadable';
 import classnames from 'classnames';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { ReactQueryDevtools } from 'react-query/devtools';
 
 import Loader from './components/Loader';
 import BodyTracker from './components/BodyTracker';
@@ -140,6 +141,7 @@ class App extends Component {
 						) : null}
 					</div>
 				</Router>
+				<ReactQueryDevtools />
 			</QueryClientProvider>
 		);
 	}

@@ -1,6 +1,7 @@
-import React, { Component } from 'react';
+import React from 'react';
 import firebase from 'firebase/app';
 import classnames from 'classnames';
+import { useQuery } from 'react-query';
 
 import dateAddDays from 'date-fns/addDays';
 import dateClosestIndexTo from 'date-fns/closestIndexTo';
@@ -99,57 +100,49 @@ function Statistics({ entries }) {
 			<StatisticsRange title="Past 3 Months" entries={entries} days={91} />
 			<StatisticsRange title="Past 6 Months" entries={entries} days={182} />
 			<StatisticsRange title="Past Year" entries={entries} days={365} />
-			<h3 className="title is-4">
-				All Time ({formatDistance(now, firstDate)})
-			</h3>
-			<StatisticsRange entries={entries} days={30000} />
+			<StatisticsRange
+				title={`All Time (${formatDistance(now, firstDate)})`}
+				entries={entries}
+				days={30000}
+			/>
 		</>
 	);
 }
 
-export default class Stats extends Component {
-	state = {
-		entries: 'loading',
-	};
-	async componentDidMount() {
-		await new Promise((resolve, reject) => {
-			firebase.auth().onAuthStateChanged(({ uid }) => {
-				if (uid) {
-					resolve();
-				}
-			});
-		});
-		this.loadEntries();
-	}
-	render() {
-		const { entries } = this.state;
-		return entries == 'loading' ? (
-			<Loader />
-		) : (
-			<section className="section">
-				<div className="container">
-					<h1 className="title">Stats</h1>
-					{entries && entries.length < 1 ? (
-						<div className="box">No entries yet. Add one to get started.</div>
-					) : (
-						<Statistics entries={entries} />
-					)}
-				</div>
-			</section>
-		);
-	}
-	loadEntries = async () => {
-		const { uid } = firebase.auth().currentUser;
-		const querySnapshot = await firebase
-			.firestore()
-			.collection(`users/${uid}/entries`)
-			.orderBy('timestamp', 'desc')
-			.get();
+export default function Stats() {
+	const { data: entries, isLoading } = useQuery(
+		'entries',
+		async () => {
+			const { uid } = firebase.auth().currentUser;
+			const querySnapshot = await firebase
+				.firestore()
+				.collection(`users/${uid}/entries`)
+				.orderBy('timestamp', 'desc')
+				.get();
 
-		const entries = querySnapshot.docs.map((d) =>
-			Object.assign(d.data(), { id: d.id })
-		);
+			const entries = querySnapshot.docs.map((d) =>
+				Object.assign(d.data(), { id: d.id })
+			);
 
-		this.setState({ entries });
-	};
+			return entries;
+		},
+		{
+			staleTime: 1000 * 60 * 10,
+		}
+	);
+
+	return isLoading ? (
+		<Loader />
+	) : (
+		<section className="section">
+			<div className="container">
+				<h1 className="title">Stats</h1>
+				{entries && entries.length < 1 ? (
+					<div className="box">No entries yet. Add one to get started.</div>
+				) : (
+					<Statistics entries={entries} />
+				)}
+			</div>
+		</section>
+	);
 }
