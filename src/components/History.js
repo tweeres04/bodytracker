@@ -1,5 +1,7 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import update from 'immutability-helper';
+import { useQuery, useMutation, useQueryClient } from 'react-query';
+
 import classnames from 'classnames';
 import firebase from 'firebase/app';
 import _findIndex from 'lodash/fp/findIndex';
@@ -97,183 +99,173 @@ function Modal({ entry, closeModal, removeEntry }) {
 
 let deletedEntry, timeoutHandle;
 
-export default class History extends Component {
-	state = {
-		entries: null,
-		undoDeleteAlert: false,
-		showModal: null,
-	};
-	async componentDidMount() {
-		await new Promise((resolve, reject) => {
-			firebase.auth().onAuthStateChanged(({ uid }) => {
-				if (uid) {
-					resolve();
-				}
-			});
-		});
-		this.loadEntries();
-	}
-	render() {
-		const { entries, undoDeleteAlert, showModal } = this.state;
-		const entryTable = entries
-			? entries.reduce((result, entry) => {
-					const timestampDate = entry.timestamp.toDate();
-					const week = differenceInCalendarWeeks(
-						timestampDate,
-						entries[entries.length - 1].timestamp.toDate()
-					);
-					const day = getDay(timestampDate);
+export default function History() {
+	const [undoDeleteAlert, setUndoDeleteAlert] = useState(false);
+	const [showModal, setShowModal] = useState(null);
+	const timeoutHandleRef = useRef(null);
+	const queryClient = useQueryClient();
 
-					if (!result[week]) {
-						result[week] = Array.from({ length: 7 }).map((_) => []);
-					}
+	const { data: entries, isLoading } = useQuery(
+		'entries',
+		async () => {
+			const { uid } = firebase.auth().currentUser;
 
-					result[week][day] = [...result[week][day], entry];
-					return result;
-			  }, [])
-			: [];
+			const querySnapshot = await firebase
+				.firestore()
+				.collection(`users/${uid}/entries`)
+				.orderBy('timestamp', 'desc')
+				.get()
+				.catch((err) => console.error(err));
 
-		return (
-			<div className="container px-2">
-				<h1 className="title">
-					History {entries && <span className="tag">{entries.length}</span>}
-				</h1>
-				{entries ? (
-					<table className="table is-narrow is-bordered is-size-7">
-						<thead>
-							<tr>
-								<th>Sun</th>
-								<th>Mon</th>
-								<th>Tues</th>
-								<th>Wed</th>
-								<th>Thu</th>
-								<th>Fri</th>
-								<th>Sat</th>
-							</tr>
-						</thead>
-						<tbody>
-							{reverse(entryTable).map((week, i) => (
-								<tr key={i}>
-									{week.map((day, i) => (
-										<td
-											key={i}
-											className={classnames('has-text-centered', {
-												'has-background-info-light': !day,
-											})}
-										>
-											{day
-												? day.map(
-														({
-															timestamp,
-															weight,
-															waist,
-															chest,
-															hips,
-															bf,
-															id,
-														}) => (
-															<div
-																key={timestamp}
-																onClick={() => this.showModal(id)}
-															>
-																<div>
-																	{dateFormat(
-																		timestamp.toDate(),
-																		'MMM d Y h:mm a'
-																	)}
-																</div>
-																<Stat label="Weight" value={weight} />
-																<Stat label="Waist" value={waist} />
-																<Stat label="Chest" value={chest} />
-																<Stat label="Hips" value={hips} />
-																<Stat label="Bodyfat" value={bf} />
-															</div>
-														)
-												  )
-												: null}
-										</td>
-									))}
-								</tr>
-							))}
-						</tbody>
-					</table>
-				) : (
-					<Loader />
-				)}
-				{entries && entries.length < 1 && (
-					<div className="box">No entries yet. Add one to get started.</div>
-				)}
-				{undoDeleteAlert && <UndoDeleteAlert undoDelete={this.undo} />}
-				{showModal && (
-					<Modal
-						entry={entries.find((e) => e.id === showModal)}
-						closeModal={() => this.showModal(null)}
-						removeEntry={() => this.removeEntry(showModal)}
-					/>
-				)}
-			</div>
-		);
-	}
-	showModal = (id) => {
-		this.setState({ showModal: id });
-	};
-	// Need to add paging, seems like there's a bug in firestore for paging on a timestamp
-	loadEntries = async () => {
-		const { uid } = firebase.auth().currentUser;
+			const entries = querySnapshot.docs.map((d) =>
+				Object.assign(d.data(), { id: d.id })
+			);
+			return entries;
+		},
+		{
+			staleTime: 1000 * 60 * 10,
+		}
+	);
 
-		const querySnapshot = await firebase
-			.firestore()
-			.collection(`users/${uid}/entries`)
-			.orderBy('timestamp', 'desc')
-			.get()
-			.catch((err) => console.error(err));
+	useEffect(() => {
+		return () => {
+			clearTimeout(timeoutHandleRef.current);
+		};
+	}, []);
 
-		const entries = querySnapshot.docs.map((d) =>
-			Object.assign(d.data(), { id: d.id })
-		);
-		this.setState({ entries });
-	};
-	removeEntry = async (entryId) => {
-		const { entries } = this.state;
+	const { mutate: removeEntry } = useMutation(async function removeEntry(
+		entryId
+	) {
 		const index = _findIndex((e) => e.id == entryId)(entries);
 		deletedEntry = entries[index];
-		this.setState((prevState) =>
-			update(prevState, {
-				entries: { $splice: [[index, 1]] },
-				undoDeleteAlert: { $set: true },
-			})
+		queryClient.setQueryData('entries', (prevEntries) =>
+			update(prevEntries, { $splice: [[index, 1]] })
 		);
+		setUndoDeleteAlert(true);
 		const { uid } = firebase.auth().currentUser;
-		timeoutHandle = setTimeout(() => {
-			this.setState({ undoDeleteAlert: false });
+		timeoutHandleRef.current = setTimeout(() => {
+			setUndoDeleteAlert(false);
 		}, 7000);
 		await firebase.firestore().doc(`users/${uid}/entries/${entryId}`).delete();
-	};
-	undo = async () => {
+	});
+
+	const { mutate: undo } = useMutation(async function undo() {
 		const { uid } = firebase.auth().currentUser;
 		const { id: newId } = await firebase
 			.firestore()
 			.collection(`users/${uid}/entries`)
 			.add(deletedEntry);
 
-		this.setState((prevState) => {
-			const statePatch = update(prevState, {
-				entries: {
-					$push: [Object.assign(deletedEntry, { id: newId })],
-				},
-				undoDeleteAlert: { $set: false },
+		queryClient.setQueryData('entries', (prevEntries) => {
+			let statePatch = update(prevEntries, {
+				$push: [Object.assign(deletedEntry, { id: newId })],
 			});
 
-			statePatch.entries = _orderBy(['timestamp'])(['desc'])(
-				statePatch.entries
-			);
+			statePatch = _orderBy(['timestamp'])(['desc'])(statePatch);
 
 			return statePatch;
 		});
+		setUndoDeleteAlert(false);
 		deletedEntry = null;
 		clearTimeout(timeoutHandle);
-	};
-	componentWillUnmount = () => {
-		clearTimeout(timeoutHandle);
-	};
+	});
+
+	const entryTable = entries
+		? entries.reduce((result, entry) => {
+				const timestampDate = entry.timestamp.toDate();
+				const week = differenceInCalendarWeeks(
+					timestampDate,
+					entries[entries.length - 1].timestamp.toDate()
+				);
+				const day = getDay(timestampDate);
+
+				if (!result[week]) {
+					result[week] = Array.from({ length: 7 }).map((_) => []);
+				}
+
+				result[week][day] = [...result[week][day], entry];
+				return result;
+		  }, [])
+		: [];
+
+	return (
+		<div className="container px-2">
+			<h1 className="title">
+				History {entries && <span className="tag">{entries.length}</span>}
+			</h1>
+			{isLoading ? (
+				<Loader />
+			) : (
+				<table className="table is-narrow is-bordered is-size-7">
+					<thead>
+						<tr>
+							<th>Sun</th>
+							<th>Mon</th>
+							<th>Tues</th>
+							<th>Wed</th>
+							<th>Thu</th>
+							<th>Fri</th>
+							<th>Sat</th>
+						</tr>
+					</thead>
+					<tbody>
+						{reverse(entryTable).map((week, i) => (
+							<tr key={i}>
+								{week.map((day, i) => (
+									<td
+										key={i}
+										className={classnames('has-text-centered is-clickable', {
+											'has-background-info-light': !day,
+										})}
+									>
+										{day
+											? day.map(
+													({
+														timestamp,
+														weight,
+														waist,
+														chest,
+														hips,
+														bf,
+														id,
+													}) => (
+														<div
+															key={timestamp}
+															onClick={() => setShowModal(id)}
+														>
+															<div>
+																{dateFormat(
+																	timestamp.toDate(),
+																	'MMM d Y h:mm a'
+																)}
+															</div>
+															<Stat label="Weight" value={weight} />
+															<Stat label="Waist" value={waist} />
+															<Stat label="Chest" value={chest} />
+															<Stat label="Hips" value={hips} />
+															<Stat label="Bodyfat" value={bf} />
+														</div>
+													)
+											  )
+											: null}
+									</td>
+								))}
+							</tr>
+						))}
+					</tbody>
+				</table>
+			)}
+			{entries && entries.length < 1 && (
+				<div className="box">No entries yet. Add one to get started.</div>
+			)}
+			{undoDeleteAlert && <UndoDeleteAlert undoDelete={undo} />}
+			{showModal && (
+				<Modal
+					entry={entries.find((e) => e.id === showModal)}
+					closeModal={() => setShowModal(null)}
+					removeEntry={() => removeEntry(showModal)}
+				/>
+			)}
+		</div>
+	);
 }
