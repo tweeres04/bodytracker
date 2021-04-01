@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import firebase from 'firebase/app';
 import Loadable from 'react-loadable';
 import classnames from 'classnames';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
 import Loader from './components/Loader';
 import BodyTracker from './components/BodyTracker';
@@ -11,38 +12,40 @@ import './App.css';
 
 const Progress = Loadable({
 	loader: () => import('./components/Progress/Progress'),
-	loading: Loader
+	loading: Loader,
 });
 
 const History = Loadable({
 	loader: () => import('./components/History'),
-	loading: Loader
+	loading: Loader,
 });
 
 const Stats = Loadable({
 	loader: () => import('./components/Stats'),
-	loading: Loader
+	loading: Loader,
 });
 
 const Signin = Loadable({
 	loader: () => import('./components/Signin'),
-	loading: Loader
+	loading: Loader,
 });
+
+const queryClient = new QueryClient();
 
 class App extends Component {
 	state = {
 		user: 'loading',
-		mobileMenu: false
+		mobileMenu: false,
 	};
 	componentDidMount() {
-		firebase.auth().onAuthStateChanged(user => {
+		firebase.auth().onAuthStateChanged((user) => {
 			if (user) {
 				this.setState({ user });
 			} else {
 				firebase
 					.auth()
 					.signInAnonymously()
-					.catch(err => {
+					.catch((err) => {
 						console.error(err);
 					});
 			}
@@ -56,85 +59,91 @@ class App extends Component {
 	render() {
 		const { user, mobileMenu } = this.state;
 		return (
-			<Router>
-				<div className="App">
-					<div className="navbar">
-						<div className="navbar-brand">
-							<Link to="/" className="navbar-item">
-								Body Tracker
-							</Link>
+			<QueryClientProvider client={queryClient}>
+				<Router>
+					<div className="App">
+						<div className="navbar">
+							<div className="navbar-brand">
+								<Link to="/" className="navbar-item">
+									Body Tracker
+								</Link>
+								<div
+									className={classnames('navbar-burger', {
+										'is-active': mobileMenu,
+									})}
+									onClick={() => {
+										this.setState(({ mobileMenu }) => ({
+											mobileMenu: !mobileMenu,
+										}));
+									}}
+								>
+									<span />
+									<span />
+									<span />
+								</div>
+							</div>
 							<div
-								className={classnames('navbar-burger', {
-									'is-active': mobileMenu
+								className={classnames('navbar-menu', {
+									'is-active': mobileMenu,
 								})}
-								onClick={() => {
-									this.setState(({ mobileMenu }) => ({
-										mobileMenu: !mobileMenu
-									}));
-								}}
 							>
-								<span />
-								<span />
-								<span />
-							</div>
-						</div>
-						<div
-							className={classnames('navbar-menu', {
-								'is-active': mobileMenu
-							})}
-						>
-							<div className="navbar-start">
-								<Link to="/stats" className="navbar-item">
-									Stats
-								</Link>
-								<Link to="/progress" className="navbar-item">
-									Progress
-								</Link>
-								<Link to="/history" className="navbar-item">
-									History
-								</Link>
-							</div>
-							<div className="navbar-end">
-								{user != 'loading' && user && user.isAnonymous && (
-									<Link to="/signin" className="navbar-item">
-										Sign In
+								<div className="navbar-start">
+									<Link to="/stats" className="navbar-item">
+										Stats
 									</Link>
-								)}
-								{user && !user.isAnonymous && (
-									<a className="navbar-item" onClick={this.logout}>
-										Logout
-									</a>
-								)}
+									<Link to="/progress" className="navbar-item">
+										Progress
+									</Link>
+									<Link to="/history" className="navbar-item">
+										History
+									</Link>
+								</div>
+								<div className="navbar-end">
+									{user != 'loading' && user && user.isAnonymous && (
+										<Link to="/signin" className="navbar-item">
+											Sign In
+										</Link>
+									)}
+									{user && !user.isAnonymous && (
+										<a className="navbar-item" onClick={this.logout}>
+											Logout
+										</a>
+									)}
+								</div>
 							</div>
 						</div>
+						{user !== 'loading' ? (
+							<>
+								<Route exact path="/" component={BodyTracker} />
+								<Route path="/stats" component={Stats} />
+								<Route path="/progress" component={Progress} />
+								<Route path="/history" component={History} />
+								<Route path="/signin" component={Signin} />
+								<footer className="footer">
+									<div className="container">
+										<div className="content has-text-centered">
+											<p>&copy; Tyler Weeres</p>
+											<p>
+												Icon made by{' '}
+												<a href="http://www.freepik.com" title="Freepik">
+													Freepik
+												</a>{' '}
+												from{' '}
+												<a href="https://www.flaticon.com/" title="Flaticon">
+													flaticon.com
+												</a>
+											</p>
+										</div>
+									</div>
+								</footer>
+							</>
+						) : null}
 					</div>
-					<Route exact path="/" component={BodyTracker} />
-					<Route path="/stats" component={Stats} />
-					<Route path="/progress" component={Progress} />
-					<Route path="/history" component={History} />
-					<Route path="/signin" component={Signin} />
-					<footer className="footer">
-						<div className="container">
-							<div className="content has-text-centered">
-								<p>&copy; Tyler Weeres</p>
-								<p>
-									Icon made by{' '}
-									<a href="http://www.freepik.com" title="Freepik">
-										Freepik
-									</a>{' '}
-									from{' '}
-									<a href="https://www.flaticon.com/" title="Flaticon">
-										flaticon.com
-									</a>
-								</p>
-							</div>
-						</div>
-					</footer>
-				</div>
-			</Router>
+				</Router>
+			</QueryClientProvider>
 		);
 	}
-	logout = async e => {
+	logout = async (e) => {
 		e.preventDefault();
 		await firebase.auth().signOut();
 		// Need to refactor to reload each route instead of using a reload

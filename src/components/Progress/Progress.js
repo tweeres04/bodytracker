@@ -1,5 +1,6 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import firebase from 'firebase/app';
+import { useQuery } from 'react-query';
 
 import isWithinInterval from 'date-fns/isWithinInterval';
 import endOfDay from 'date-fns/endOfDay';
@@ -26,188 +27,176 @@ const backgroundColours = [
 
 const minDate = new Date(1900, 0);
 
-export default class Progress extends Component {
-	state = {
-		loading: true,
-		entries: [],
-		start: null,
-		end: null,
+export default function Progress() {
+	const [{ start, end }, setDateRange] = useState({ start: null, end: null });
+
+	let { data: entries = [], isLoading } = useQuery(
+		'entries',
+		async () => {
+			const { uid } = firebase.auth().currentUser;
+			const querySnapshot = await firebase
+				.firestore()
+				.collection(`users/${uid}/entries`)
+				.orderBy('timestamp')
+				.get();
+			const entries = querySnapshot.docs.map((ds) => ds.data());
+			return entries;
+		},
+		{
+			staleTime: 1000 * 60 * 10,
+		}
+	);
+
+	const interval = {
+		start: start || minDate,
+		end: endOfDay(end || new Date()),
 	};
-	async componentDidMount() {
-		const userPromise = new Promise((resolve, reject) => {
-			firebase.auth().onAuthStateChanged((user) => {
-				if (user) {
-					resolve(user);
-				}
-			});
-		});
-		const { uid } = await userPromise;
-		const querySnapshot = await firebase
-			.firestore()
-			.collection(`users/${uid}/entries`)
-			.orderBy('timestamp')
-			.get();
-		const entries = querySnapshot.docs.map((ds) => ds.data());
-		this.setState({ entries, loading: false });
-	}
-	render() {
-		const { loading, start, end } = this.state;
-		let { entries } = this.state;
 
-		const interval = {
-			start: start || minDate,
-			end: endOfDay(end || new Date()),
-		};
+	entries =
+		start || end
+			? entries.filter((e) =>
+					isWithinInterval(new Date(e.timestamp.seconds * 1000), interval)
+			  )
+			: entries;
 
-		entries =
-			start || end
-				? entries.filter((e) =>
-						isWithinInterval(new Date(e.timestamp.seconds * 1000), interval)
-				  )
-				: entries;
+	const times = entries.map((e) => new Date(e.timestamp.seconds * 1000));
+	const weight = entries.map((e) => e.weight);
+	const waist = entries.map((e) => e.waist);
+	const chest = entries.map((e) => e.chest);
+	const hips = entries.map((e) => e.hips);
+	const bf = entries.map((e) => e.bf);
 
-		const times = entries.map((e) => new Date(e.timestamp.seconds * 1000));
-		const weight = entries.map((e) => e.weight);
-		const waist = entries.map((e) => e.waist);
-		const chest = entries.map((e) => e.chest);
-		const hips = entries.map((e) => e.hips);
-		const bf = entries.map((e) => e.bf);
+	const movingAverageInterval = Math.round(entries.length / 5);
+	const movingAverageSampleInterval = Math.round(Math.log2(entries.length)); // Plot one of every n entries to smooth the line
 
-		const movingAverageInterval = Math.round(entries.length / 5);
-		const movingAverageSampleInterval = Math.round(Math.log2(entries.length)); // Plot one of every n entries to smooth the line
+	const weightMovingAverageRemainder =
+		(weight.length - 1) % movingAverageSampleInterval;
+	const weightMovingAverageDataset = {
+		label: `Weight (${movingAverageInterval} Entry Average)`,
+		data: weight.map((w, i) =>
+			i < movingAverageInterval ||
+			i % movingAverageSampleInterval !== weightMovingAverageRemainder
+				? null
+				: _range(i - movingAverageInterval + 1, i + 1).reduce(
+						(sum, i) => sum + weight[i],
+						0
+				  ) / movingAverageInterval
+		),
+		yAxisID: 'weight-axis',
+		spanGaps: true,
+	};
 
-		const weightMovingAverageRemainder =
-			(weight.length - 1) % movingAverageSampleInterval;
-		const weightMovingAverageDataset = {
-			label: `Weight (${movingAverageInterval} Entry Average)`,
-			data: weight.map((w, i) =>
-				i < movingAverageInterval ||
-				i % movingAverageSampleInterval !== weightMovingAverageRemainder
-					? null
-					: _range(i - movingAverageInterval + 1, i + 1).reduce(
-							(sum, i) => sum + weight[i],
-							0
-					  ) / movingAverageInterval
-			),
+	const waistMovingAverageRemainder =
+		(waist.length - 1) % movingAverageSampleInterval;
+	const waistMovingAverageDataset = {
+		label: `Waist (${movingAverageInterval} Entry Average)`,
+		data: waist.map((w, i) =>
+			i < movingAverageInterval ||
+			i % movingAverageSampleInterval !== waistMovingAverageRemainder
+				? null
+				: _range(i - movingAverageInterval + 1, i + 1).reduce(
+						(sum, i) => sum + waist[i],
+						0
+				  ) / movingAverageInterval
+		),
+		yAxisID: 'other-axis',
+		spanGaps: true,
+	};
+
+	const datasets = [
+		{
+			label: 'Weight',
+			data: weight,
+			borderColor: colours[0],
+			backgroundColor: backgroundColours[0],
 			yAxisID: 'weight-axis',
+			lineTension: 0,
 			spanGaps: true,
-		};
-
-		const waistMovingAverageRemainder =
-			(waist.length - 1) % movingAverageSampleInterval;
-		const waistMovingAverageDataset = {
-			label: `Waist (${movingAverageInterval} Entry Average)`,
-			data: waist.map((w, i) =>
-				i < movingAverageInterval ||
-				i % movingAverageSampleInterval !== waistMovingAverageRemainder
-					? null
-					: _range(i - movingAverageInterval + 1, i + 1).reduce(
-							(sum, i) => sum + waist[i],
-							0
-					  ) / movingAverageInterval
-			),
+		},
+		{
+			label: 'Waist',
+			data: waist,
+			borderColor: colours[1],
+			backgroundColor: backgroundColours[1],
 			yAxisID: 'other-axis',
+			lineTension: 0,
 			spanGaps: true,
-		};
+		},
+		{
+			label: 'Chest',
+			data: chest,
+			borderColor: colours[2],
+			backgroundColor: backgroundColours[2],
+			yAxisID: 'other-axis',
+			lineTension: 0,
+			spanGaps: true,
+		},
+		{
+			label: 'Hips',
+			data: hips,
+			borderColor: colours[3],
+			backgroundColor: backgroundColours[3],
+			yAxisID: 'other-axis',
+			lineTension: 0,
+			spanGaps: true,
+		},
+		{
+			label: 'Bodyfat %',
+			data: bf,
+			borderColor: colours[0],
+			backgroundColor: backgroundColours[0],
+			yAxisID: 'other-axis',
+			lineTension: 0,
+			spanGaps: true,
+		},
+	];
 
-		const datasets = [
-			{
-				label: 'Weight',
-				data: weight,
-				borderColor: colours[0],
-				backgroundColor: backgroundColours[0],
-				yAxisID: 'weight-axis',
-				lineTension: 0,
-				spanGaps: true,
-			},
-			{
-				label: 'Waist',
-				data: waist,
-				borderColor: colours[1],
-				backgroundColor: backgroundColours[1],
-				yAxisID: 'other-axis',
-				lineTension: 0,
-				spanGaps: true,
-			},
-			{
-				label: 'Chest',
-				data: chest,
-				borderColor: colours[2],
-				backgroundColor: backgroundColours[2],
-				yAxisID: 'other-axis',
-				lineTension: 0,
-				spanGaps: true,
-			},
-			{
-				label: 'Hips',
-				data: hips,
-				borderColor: colours[3],
-				backgroundColor: backgroundColours[3],
-				yAxisID: 'other-axis',
-				lineTension: 0,
-				spanGaps: true,
-			},
-			{
-				label: 'Bodyfat %',
-				data: bf,
-				borderColor: colours[0],
-				backgroundColor: backgroundColours[0],
-				yAxisID: 'other-axis',
-				lineTension: 0,
-				spanGaps: true,
-			},
-		];
+	const yAxes = {
+		weightAxis: {
+			id: 'weight-axis',
+		},
+		otherAxis: {
+			id: 'other-axis',
+		},
+	};
 
-		const yAxes = {
-			weightAxis: {
-				id: 'weight-axis',
-			},
-			otherAxis: {
-				id: 'other-axis',
-			},
-		};
-
-		return loading ? (
-			<Loader />
-		) : (
-			<section className="section">
-				<div className="container">
-					<h1 className="title">Progress</h1>
-					<ChartControls onDateRangeChange={this.onDateRangeChange} />
-					<div className="columns" key="all">
+	return isLoading ? (
+		<Loader />
+	) : (
+		<section className="section">
+			<div className="container">
+				<h1 className="title">Progress</h1>
+				<ChartControls onDateRangeChange={setDateRange} />
+				<div className="columns" key="all">
+					<div className="column">
+						<Chart
+							times={times}
+							datasets={datasets}
+							yAxes={[yAxes.weightAxis, yAxes.otherAxis]}
+						/>
+					</div>
+				</div>
+				{datasets.map((d) => (
+					<div className="columns" key={d.label}>
 						<div className="column">
+							<h2 className="title is-5">{d.label}</h2>
 							<Chart
 								times={times}
-								datasets={datasets}
-								yAxes={[yAxes.weightAxis, yAxes.otherAxis]}
+								datasets={
+									d.label === 'Weight'
+										? [d, weightMovingAverageDataset]
+										: d.label === 'Waist'
+										? [d, waistMovingAverageDataset]
+										: [d]
+								}
+								yAxes={[
+									d.label == 'Weight' ? yAxes.weightAxis : yAxes.otherAxis,
+								]}
 							/>
 						</div>
 					</div>
-					{datasets.map((d) => (
-						<div className="columns" key={d.label}>
-							<div className="column">
-								<h2 className="title is-5">{d.label}</h2>
-								<Chart
-									times={times}
-									datasets={
-										d.label === 'Weight'
-											? [d, weightMovingAverageDataset]
-											: d.label === 'Waist'
-											? [d, waistMovingAverageDataset]
-											: [d]
-									}
-									yAxes={[
-										d.label == 'Weight' ? yAxes.weightAxis : yAxes.otherAxis,
-									]}
-								/>
-							</div>
-						</div>
-					))}
-				</div>
-			</section>
-		);
-	}
-	onDateRangeChange = (statePatch) => {
-		this.setState(statePatch);
-	};
+				))}
+			</div>
+		</section>
+	);
 }
