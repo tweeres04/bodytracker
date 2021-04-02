@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import firebase from 'firebase/app';
-import { useQuery } from 'react-query';
 
 import isWithinInterval from 'date-fns/isWithinInterval';
 import endOfDay from 'date-fns/endOfDay';
 
 import _range from 'lodash/range';
+import _orderBy from 'lodash/orderBy';
 
 import Loader from '../Loader';
+import useEntries from '../useEntries';
 import ChartControls from './ChartControls';
 import Chart from './Chart';
 
@@ -30,22 +30,9 @@ const minDate = new Date(1900, 0);
 export default function Progress() {
 	const [{ start, end }, setDateRange] = useState({ start: null, end: null });
 
-	let { data: entries = [], isLoading } = useQuery(
-		'entries',
-		async () => {
-			const { uid } = firebase.auth().currentUser;
-			const querySnapshot = await firebase
-				.firestore()
-				.collection(`users/${uid}/entries`)
-				.orderBy('timestamp')
-				.get();
-			const entries = querySnapshot.docs.map((ds) => ds.data());
-			return entries;
-		},
-		{
-			staleTime: 1000 * 60 * 10,
-		}
-	);
+	let { data: entries = [], isLoading } = useEntries();
+
+	entries = _orderBy(entries, 'timestamp');
 
 	const interval = {
 		start: start || minDate,

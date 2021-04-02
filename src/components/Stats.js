@@ -1,7 +1,5 @@
 import React from 'react';
-import firebase from 'firebase/app';
 import classnames from 'classnames';
-import { useQuery } from 'react-query';
 
 import dateAddDays from 'date-fns/addDays';
 import dateClosestIndexTo from 'date-fns/closestIndexTo';
@@ -13,6 +11,7 @@ import format from 'date-fns/format';
 import _round from 'lodash/round';
 
 import Loader from './Loader';
+import useEntries from './useEntries';
 
 function Statistic({ label, latestEntry, firstEntry }) {
 	const value = firstEntry ? _round(latestEntry - firstEntry, 2) : latestEntry;
@@ -110,26 +109,7 @@ function Statistics({ entries }) {
 }
 
 export default function Stats() {
-	const { data: entries, isLoading } = useQuery(
-		'entries',
-		async () => {
-			const { uid } = firebase.auth().currentUser;
-			const querySnapshot = await firebase
-				.firestore()
-				.collection(`users/${uid}/entries`)
-				.orderBy('timestamp', 'desc')
-				.get();
-
-			const entries = querySnapshot.docs.map((d) =>
-				Object.assign(d.data(), { id: d.id })
-			);
-
-			return entries;
-		},
-		{
-			staleTime: 1000 * 60 * 10,
-		}
-	);
+	const { data: entries, isLoading } = useEntries();
 
 	return isLoading ? (
 		<Loader />

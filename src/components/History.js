@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import update from 'immutability-helper';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
+import { useMutation, useQueryClient } from 'react-query';
 
 import classnames from 'classnames';
 import firebase from 'firebase/app';
@@ -8,10 +8,12 @@ import _findIndex from 'lodash/fp/findIndex';
 import _orderBy from 'lodash/fp/orderBy';
 import reverse from 'lodash/reverse';
 import dateFormat from 'date-fns/format';
-import Loader from './Loader';
 
 import differenceInCalendarWeeks from 'date-fns/differenceInCalendarWeeks';
 import getDay from 'date-fns/getDay';
+
+import Loader from './Loader';
+import useEntries from './useEntries';
 
 function UndoDeleteAlert({ undoDelete }) {
 	return (
@@ -105,27 +107,7 @@ export default function History() {
 	const timeoutHandleRef = useRef(null);
 	const queryClient = useQueryClient();
 
-	const { data: entries, isLoading } = useQuery(
-		'entries',
-		async () => {
-			const { uid } = firebase.auth().currentUser;
-
-			const querySnapshot = await firebase
-				.firestore()
-				.collection(`users/${uid}/entries`)
-				.orderBy('timestamp', 'desc')
-				.get()
-				.catch((err) => console.error(err));
-
-			const entries = querySnapshot.docs.map((d) =>
-				Object.assign(d.data(), { id: d.id })
-			);
-			return entries;
-		},
-		{
-			staleTime: 1000 * 60 * 10,
-		}
-	);
+	const { data: entries, isLoading } = useEntries();
 
 	useEffect(() => {
 		return () => {
