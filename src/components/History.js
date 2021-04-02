@@ -197,7 +197,7 @@ export default function History() {
 									<td
 										key={i}
 										className={classnames('has-text-centered is-clickable', {
-											'has-background-info-light': !day,
+											'has-background-light': day.length < 1,
 										})}
 									>
 										{day
