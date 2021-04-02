@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useMutation } from 'react-query';
 
 import 'flatpickr/dist/themes/material_green.css';
 
@@ -12,7 +13,7 @@ import _toNumber from 'lodash/fp/toNumber';
 import _isEmpty from 'lodash/fp/isEmpty';
 
 function entryData(entry) {
-	let result = _pickBy(f => f != '')(entry);
+	let result = _pickBy((f) => f != '')(entry);
 	if (_isEmpty(result)) {
 		return null;
 	}
@@ -26,7 +27,7 @@ function entryFormFactory() {
 		waist: '',
 		chest: '',
 		hips: '',
-		bf: ''
+		bf: '',
 	};
 }
 
@@ -39,7 +40,7 @@ function EntrySuccessNotification({ active }) {
 					left: 0,
 					bottom: 0,
 					width: '100%',
-					zIndex: 1
+					zIndex: 1,
 				}}
 			>
 				<div className="container">
@@ -57,7 +58,7 @@ function BodyTrackerDateField({
 	name,
 	value,
 	handleChange,
-	placeholder
+	placeholder,
 }) {
 	return (
 		<div className="field">
@@ -74,7 +75,7 @@ function BodyTrackerDateField({
 					options={{
 						enableTime: true,
 						altInput: true,
-						altFormat: 'M j, Y - h:i K'
+						altFormat: 'M j, Y - h:i K',
 					}}
 				/>
 			</div>
@@ -102,151 +103,140 @@ function BodyTrackerField({ label, name, value, handleChange, placeholder }) {
 	);
 }
 
-let timeoutHandle;
+export default function BodyTracker() {
+	const [entry, setEntry] = useState(entryFormFactory());
+	const [successNotification, setSuccessNotification] = useState(false);
+	const timeoutHandle = useRef(null);
 
-export default class BodyTracker extends Component {
-	state = {
-		entry: entryFormFactory(),
-		successNotification: false,
-		submitting: false
-	};
-	componentDidMount() {
-		this.userPromise = new Promise((resolve, reject) => {
-			firebase.auth().onAuthStateChanged(user => {
-				if (user) {
-					resolve(user);
-				}
-			});
-		});
+	const { timestamp, weight, waist, chest, hips, bf } = entry;
+
+	useEffect(() => {
 		document.addEventListener('visibilitychange', () => {
 			if (!document.hidden) {
-				this.now();
+				setEntry((entry) =>
+					update(entry, {
+						timestamp: { $set: new Date() },
+					})
+				);
 			}
 		});
-	}
-	render() {
-		const {
-			entry: { timestamp, weight, waist, chest, hips, bf },
-			successNotification,
-			submitting
-		} = this.state;
+	}, []);
 
-		const submitButtonClasses = classnames(
-			'button is-large is-fullwidth is-primary',
-			{
-				'is-loading': submitting
-			}
+	useEffect(() => {
+		return () => {
+			clearTimeout(timeoutHandle.current);
+		};
+	}, []);
+
+	function handleInputChange({ target: { name, value } }) {
+		value = value == '' ? value : _toNumber(value);
+		setEntry((entry) =>
+			update(entry, {
+				[name]: { $set: value },
+			})
 		);
+	}
 
-		return (
-			<section className="section">
-				<div className="container">
-					<div className="columns">
-						<div className="column">
-							<h1 className="title">Bodytracker</h1>
-							<BodyTrackerDateField
-								label="Date and Time"
-								name="timestamp"
-								value={timestamp}
-								handleChange={dates => {
-									const result = update(this.state, {
-										entry: { timestamp: { $set: dates[0] } }
-									});
-									this.setState(result);
-								}}
-								placeholder="Date and time of entry"
-							/>
-							<BodyTrackerField
-								label="Weight"
-								name="weight"
-								value={weight}
-								handleChange={this.handleInputChange}
-								placeholder="Your current weight"
-							/>
-							<BodyTrackerField
-								label="Waist"
-								name="waist"
-								value={waist}
-								handleChange={this.handleInputChange}
-								placeholder="Your current waist measurement"
-							/>
-							<BodyTrackerField
-								label="Chest"
-								name="chest"
-								value={chest}
-								handleChange={this.handleInputChange}
-								placeholder="Your current chest measurement"
-							/>
-							<BodyTrackerField
-								label="Hips"
-								name="hips"
-								value={hips}
-								handleChange={this.handleInputChange}
-								placeholder="Your current hips measurement"
-							/>
-							<BodyTrackerField
-								label="Bodyfat Percentage"
-								name="bf"
-								value={bf}
-								handleChange={this.handleInputChange}
-								placeholder="Your current bodyfat percentage"
-							/>
-						</div>
-					</div>
-					<div className="columns">
-						<div className="column">
-							<button
-								disabled={submitting}
-								className={submitButtonClasses}
-								onClick={this.handleSubmit}
-							>
-								Submit
-							</button>
-						</div>
+	const { mutate: handleSubmit, isLoading: isSubmitting } = useMutation(
+		async function handleSubmit() {
+			const entryToSave = entryData(entry);
+			if (entryToSave) {
+				const { uid } = firebase.auth().currentUser;
+				await firebase
+					.firestore()
+					.collection('users')
+					.doc(uid)
+					.collection('entries')
+					.add(entryToSave)
+					.catch((err) => {
+						console.error(err);
+					});
+				setEntry(entryFormFactory());
+				setSuccessNotification(true);
+
+				timeoutHandle.current = setTimeout(() => {
+					setSuccessNotification(false);
+				}, 3000);
+			}
+		}
+	);
+
+	const submitButtonClasses = classnames(
+		'button is-large is-fullwidth is-primary',
+		{
+			'is-loading': isSubmitting,
+		}
+	);
+
+	return (
+		<section className="section">
+			<div className="container">
+				<div className="columns">
+					<div className="column">
+						<h1 className="title">Bodytracker</h1>
+						<BodyTrackerDateField
+							label="Date and Time"
+							name="timestamp"
+							value={timestamp}
+							handleChange={(dates) => {
+								setEntry((entry) =>
+									update(entry, {
+										timestamp: { $set: dates[0] },
+									})
+								);
+							}}
+							placeholder="Date and time of entry"
+						/>
+						<BodyTrackerField
+							label="Weight"
+							name="weight"
+							value={weight}
+							handleChange={handleInputChange}
+							placeholder="Your current weight"
+						/>
+						<BodyTrackerField
+							label="Waist"
+							name="waist"
+							value={waist}
+							handleChange={handleInputChange}
+							placeholder="Your current waist measurement"
+						/>
+						<BodyTrackerField
+							label="Chest"
+							name="chest"
+							value={chest}
+							handleChange={handleInputChange}
+							placeholder="Your current chest measurement"
+						/>
+						<BodyTrackerField
+							label="Hips"
+							name="hips"
+							value={hips}
+							handleChange={handleInputChange}
+							placeholder="Your current hips measurement"
+						/>
+						<BodyTrackerField
+							label="Bodyfat Percentage"
+							name="bf"
+							value={bf}
+							handleChange={handleInputChange}
+							placeholder="Your current bodyfat percentage"
+						/>
 					</div>
 				</div>
-				<EntrySuccessNotification active={successNotification} />
-			</section>
-		);
-	}
-	handleInputChange = ({ target: { name, value } }) => {
-		value = value == '' ? value : _toNumber(value);
-		const statePatch = update(this.state, {
-			entry: { [name]: { $set: value } }
-		});
-		this.setState(statePatch);
-	};
-	handleSubmit = async () => {
-		const entry = entryData(this.state.entry);
-		if (entry) {
-			this.setState({ submitting: true });
-			const { uid } = await this.userPromise;
-			await firebase
-				.firestore()
-				.collection('users')
-				.doc(uid)
-				.collection('entries')
-				.add(entry)
-				.catch(err => {
-					console.error(err);
-				});
-			this.setState(() => ({
-				entry: entryFormFactory(),
-				successNotification: true,
-				submitting: false
-			}));
-			timeoutHandle = setTimeout(() => {
-				this.setState({ successNotification: false });
-			}, 3000);
-		}
-	};
-	componentWillUnmount() {
-		clearTimeout(timeoutHandle);
-	}
-	now = () => {
-		const statePatch = update(this.state, {
-			entry: { timestamp: { $set: new Date() } }
-		});
-		this.setState(statePatch);
-	};
+				<div className="columns">
+					<div className="column">
+						<button
+							disabled={isSubmitting}
+							className={submitButtonClasses}
+							onClick={handleSubmit}
+						>
+							Submit
+						</button>
+					</div>
+				</div>
+			</div>
+			<EntrySuccessNotification active={successNotification} />
+		</section>
+	);
 }
