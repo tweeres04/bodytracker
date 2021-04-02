@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useMutation } from 'react-query';
+import { useMutation, useQueryClient } from 'react-query';
 
 import 'flatpickr/dist/themes/material_green.css';
 
@@ -107,6 +107,7 @@ export default function BodyTracker() {
 	const [entry, setEntry] = useState(entryFormFactory());
 	const [successNotification, setSuccessNotification] = useState(false);
 	const timeoutHandle = useRef(null);
+	const queryClient = useQueryClient();
 
 	const { timestamp, weight, waist, chest, hips, bf } = entry;
 
@@ -142,7 +143,7 @@ export default function BodyTracker() {
 			const entryToSave = entryData(entry);
 			if (entryToSave) {
 				const { uid } = firebase.auth().currentUser;
-				await firebase
+				const docRef = await firebase
 					.firestore()
 					.collection('users')
 					.doc(uid)
@@ -157,7 +158,20 @@ export default function BodyTracker() {
 				timeoutHandle.current = setTimeout(() => {
 					setSuccessNotification(false);
 				}, 3000);
+
+				return {
+					...entryToSave,
+					timestamp: firebase.firestore.Timestamp.fromDate(
+						entryToSave.timestamp
+					),
+					id: docRef.id,
+				};
 			}
+		},
+		{
+			onSuccess: (newDoc) => {
+				queryClient.setQueryData('entries', (entries) => [newDoc, ...entries]);
+			},
 		}
 	);
 
