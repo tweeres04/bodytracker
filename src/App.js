@@ -40,16 +40,7 @@ class App extends Component {
 	};
 	componentDidMount() {
 		firebase.auth().onAuthStateChanged((user) => {
-			if (user) {
-				this.setState({ user });
-			} else {
-				firebase
-					.auth()
-					.signInAnonymously()
-					.catch((err) => {
-						console.error(err);
-					});
-			}
+			this.setState({ user });
 		});
 
 		Stats.preload();
@@ -62,84 +53,89 @@ class App extends Component {
 		return (
 			<QueryClientProvider client={queryClient}>
 				<Router>
-					<div className="App">
-						<div className="navbar">
-							<div className="navbar-brand">
-								<Link to="/" className="navbar-item">
-									Body Tracker
-								</Link>
-								<div
-									className={classnames('navbar-burger', {
-										'is-active': mobileMenu,
-									})}
-									onClick={() => {
-										this.setState(({ mobileMenu }) => ({
-											mobileMenu: !mobileMenu,
-										}));
-									}}
-								>
-									<span />
-									<span />
-									<span />
-								</div>
-							</div>
-							<div
-								className={classnames('navbar-menu', {
-									'is-active': mobileMenu,
-								})}
-							>
-								<div className="navbar-start">
-									<Link to="/stats" className="navbar-item">
-										Stats
+					{user === 'loading' ? null : (
+						<div className="App">
+							<div className="navbar">
+								<div className="navbar-brand">
+									<Link to="/" className="navbar-item">
+										Body Tracker
 									</Link>
-									<Link to="/progress" className="navbar-item">
-										Progress
-									</Link>
-									<Link to="/history" className="navbar-item">
-										History
-									</Link>
-								</div>
-								<div className="navbar-end">
-									{user != 'loading' && user && user.isAnonymous && (
-										<Link to="/signin" className="navbar-item">
-											Sign In
-										</Link>
-									)}
-									{user && !user.isAnonymous && (
-										<a className="navbar-item" onClick={this.logout}>
-											Logout
-										</a>
+									{user && (
+										<div
+											className={classnames('navbar-burger', {
+												'is-active': mobileMenu,
+											})}
+											onClick={() => {
+												this.setState(({ mobileMenu }) => ({
+													mobileMenu: !mobileMenu,
+												}));
+											}}
+										>
+											<span />
+											<span />
+											<span />
+										</div>
 									)}
 								</div>
-							</div>
-						</div>
-						{user !== 'loading' ? (
-							<>
-								<Route exact path="/" component={BodyTracker} />
-								<Route path="/stats" component={Stats} />
-								<Route path="/progress" component={Progress} />
-								<Route path="/history" component={History} />
-								<Route path="/signin" component={Signin} />
-								<footer className="footer">
-									<div className="container">
-										<div className="content has-text-centered">
-											<p>&copy; Tyler Weeres</p>
-											<p>
-												Icon made by{' '}
-												<a href="http://www.freepik.com" title="Freepik">
-													Freepik
-												</a>{' '}
-												from{' '}
-												<a href="https://www.flaticon.com/" title="Flaticon">
-													flaticon.com
+								{user && (
+									<div
+										className={classnames('navbar-menu', {
+											'is-active': mobileMenu,
+										})}
+									>
+										<div className="navbar-start">
+											<Link to="/stats" className="navbar-item">
+												Stats
+											</Link>
+											<Link to="/progress" className="navbar-item">
+												Progress
+											</Link>
+											<Link to="/history" className="navbar-item">
+												History
+											</Link>
+										</div>
+										<div className="navbar-end">
+											{user && (
+												<a className="navbar-item" onClick={this.logout}>
+													Logout
 												</a>
-											</p>
+											)}
 										</div>
 									</div>
-								</footer>
-							</>
-						) : null}
-					</div>
+								)}
+							</div>
+							{user ? (
+								<>
+									<Route exact path="/" component={BodyTracker} />
+									<Route path="/stats" component={Stats} />
+									<Route path="/progress" component={Progress} />
+									<Route path="/history" component={History} />
+									<Route path="/signin" component={Signin} />
+								</>
+							) : (
+								<Signin />
+							)}
+							<footer className="footer">
+								<div className="container">
+									<div className="content has-text-centered">
+										<p>
+											<a href="https://tweeres.ca">&copy; Tyler Weeres</a>
+										</p>
+										<p>
+											Icon made by{' '}
+											<a href="http://www.freepik.com" title="Freepik">
+												Freepik
+											</a>{' '}
+											from{' '}
+											<a href="https://www.flaticon.com/" title="Flaticon">
+												flaticon.com
+											</a>
+										</p>
+									</div>
+								</div>
+							</footer>
+						</div>
+					)}
 				</Router>
 				<ReactQueryDevtools />
 			</QueryClientProvider>
