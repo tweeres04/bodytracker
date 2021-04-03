@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useMutation, useQueryClient } from 'react-query';
+import amplitude from 'amplitude-js';
 
 import 'flatpickr/dist/themes/material_green.css';
 
@@ -158,6 +159,10 @@ export default function BodyTracker() {
 				timeoutHandle.current = setTimeout(() => {
 					setSuccessNotification(false);
 				}, 3000);
+
+				amplitude
+					.getInstance()
+					.logEvent('entry_logged', { entry: entryToSave });
 
 				return {
 					...entryToSave,

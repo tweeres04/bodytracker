@@ -5,6 +5,7 @@ import Loadable from 'react-loadable';
 import classnames from 'classnames';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
+import amplitude from 'amplitude-js';
 
 import Loader from './components/Loader';
 import BodyTracker from './components/BodyTracker';
@@ -31,6 +32,17 @@ const Signin = Loadable({
 	loading: Loader,
 });
 
+// From https://web.dev/customize-install/#detect-launch-type
+function getPWADisplayMode() {
+	const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+	if (document.referrer.startsWith('android-app://')) {
+		return 'twa';
+	} else if (navigator.standalone || isStandalone) {
+		return 'standalone';
+	}
+	return 'browser';
+}
+
 const queryClient = new QueryClient();
 
 class App extends Component {
@@ -41,12 +53,23 @@ class App extends Component {
 	componentDidMount() {
 		firebase.auth().onAuthStateChanged((user) => {
 			this.setState({ user });
+			amplitude.getInstance().setUserId(user.uid);
 		});
 
 		Stats.preload();
 		Progress.preload();
 		History.preload();
 		Signin.preload();
+
+		amplitude.getInstance().init(process.env.REACT_APP_AMPLITUDE_API_KEY);
+
+		window.addEventListener('appinstalled', () => {
+			amplitude.getInstance().logEvent('app_installed');
+		});
+
+		const displayMode = getPWADisplayMode();
+		const identify = new amplitude.Identify().set('display_mode', displayMode);
+		amplitude.getInstance().identify(identify);
 	}
 	render() {
 		const { user, mobileMenu } = this.state;
@@ -144,8 +167,9 @@ class App extends Component {
 	logout = async (e) => {
 		e.preventDefault();
 		await firebase.auth().signOut();
-		// Need to refactor to reload each route instead of using a reload
-		window.location.reload();
+
+		amplitude.getInstance().setUserId(null);
+		amplitude.getInstance().regenerateDeviceId();
 	};
 }
 
