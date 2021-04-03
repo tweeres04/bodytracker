@@ -42,11 +42,11 @@ export default function Progress() {
 	entries =
 		start || end
 			? entries.filter((e) =>
-					isWithinInterval(new Date(e.timestamp.seconds * 1000), interval)
+					isWithinInterval(new Date(e.timestamp.toDate()), interval)
 			  )
 			: entries;
 
-	const times = entries.map((e) => new Date(e.timestamp.seconds * 1000));
+	const times = entries.map((e) => new Date(e.timestamp.toDate()));
 	const weight = entries.map((e) => e.weight);
 	const waist = entries.map((e) => e.waist);
 	const chest = entries.map((e) => e.chest);
