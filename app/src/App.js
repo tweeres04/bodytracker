@@ -81,7 +81,7 @@ class App extends Component {
 							<div className="navbar">
 								<div className="navbar-brand">
 									<Link to="/" className="navbar-item">
-										Body Tracker
+										Bodytracker
 									</Link>
 									{user && (
 										<div
@@ -160,7 +160,7 @@ class App extends Component {
 						</div>
 					)}
 				</Router>
-				<ReactQueryDevtools />
+				{/* <ReactQueryDevtools /> */}
 			</QueryClientProvider>
 		);
 	}
