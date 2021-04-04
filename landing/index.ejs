@@ -11,6 +11,22 @@
 			content="The weight and measurement logging app that gives you helpful screens, stats and visualizations to help you along the way. Be in full control of your body goals."
 		/>
 		<link rel="stylesheet" href="css/main.css" />
+		<% if (process.env.NODE_ENV === 'production') { %>
+		<!-- Global site tag (gtag.js) - Google Analytics -->
+		<script
+			async
+			src="https://www.googletagmanager.com/gtag/js?id=<%= process.env.GOOGLE_ANALYTICS_MEASUREMENT_ID %>"
+		></script>
+		<script>
+			window.dataLayer = window.dataLayer || [];
+			function gtag() {
+				dataLayer.push(arguments);
+			}
+			gtag('js', new Date());
+
+			gtag('config', '<%= process.env.GOOGLE_ANALYTICS_MEASUREMENT_ID %>');
+		</script>
+		<% } %>
 	</head>
 	<body>
 		<section class="hero is-medium is-primary">
@@ -61,6 +77,5 @@
 				<a href="https://tweeres.ca">&copy; Tyler Weeres</a>
 			</div>
 		</footer>
-		<script type="text/javascript" src="lib/main.js"></script>
 	</body>
 </html>
