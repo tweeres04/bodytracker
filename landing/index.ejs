@@ -42,6 +42,9 @@
 							<a
 								class="button is-primary is-large is-inverted"
 								href="https://app.bodytracker.ca"
+								<% if (process.env.NODE_ENV === 'production') { %>
+								onclick="gtag('event', 'clicked_cta')"
+								<% } %>
 							>
 								Start tracking for free →
 							</a>
