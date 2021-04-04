@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<% const isProduction = process.env.NODE_ENV === 'production'; %>
 <html>
 	<head>
 		<meta charset="utf-8" />
@@ -11,7 +12,7 @@
 			content="The weight and measurement logging app that gives you helpful screens, stats and visualizations to help you along the way. Be in full control of your body goals."
 		/>
 		<link rel="stylesheet" href="css/main.css" />
-		<% if (process.env.NODE_ENV === 'production') { %>
+		<% if (isProduction) { %>
 		<!-- Global site tag (gtag.js) - Google Analytics -->
 		<script
 			async
@@ -42,9 +43,7 @@
 							<a
 								class="button is-primary is-large is-inverted"
 								href="https://app.bodytracker.ca"
-								<% if (process.env.NODE_ENV === 'production') { %>
-								onclick="gtag('event', 'clicked_cta')"
-								<% } %>
+								id="hero-cta"
 							>
 								Start tracking for free →
 							</a>
@@ -80,5 +79,21 @@
 				<a href="https://tweeres.ca">&copy; Tyler Weeres</a>
 			</div>
 		</footer>
+		<% if (isProduction) { %>
+		<script>
+			document.addEventListener('DOMContentLoaded', function () {
+				document
+					.getElementById('hero-cta')
+					.addEventListener('click', function (e) {
+						e.preventDefault();
+						gtag('event', 'clicked_cta', {
+							event_callback: function () {
+								document.location = e.target.href;
+							},
+						});
+					});
+			});
+		</script>
+		<% } %>
 	</body>
 </html>
