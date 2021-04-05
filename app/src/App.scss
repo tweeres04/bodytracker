@@ -1,0 +1,9 @@
+.has-text-8 {
+	font-size: 0.5rem;
+}
+
+$measuring-tape-orange: rgb(255, 174, 51);
+
+$primary: $measuring-tape-orange;
+
+@import 'bulma/bulma.sass';

@@ -28,14 +28,13 @@ $primary-invert: $pink-invert;
 
 @import '../node_modules/bulma/sass/utilities/initial-variables';
 
-$primary: rgb(255, 174, 51);
+$measuring-tape-orange: rgb(255, 174, 51);
+
+$primary: $measuring-tape-orange;
 
 .mx-auto {
 	margin-left: auto;
 	margin-right: auto;
-}
-
-.is-half-tablet-only {
 }
 
 @import '../node_modules/bulma/bulma';

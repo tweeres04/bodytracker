@@ -10,7 +10,7 @@ import amplitude from 'amplitude-js';
 import Loader from './components/Loader';
 import BodyTracker from './components/BodyTracker';
 
-import './App.css';
+import './App.scss';
 
 const Progress = Loadable({
 	loader: () => import('./components/Progress/Progress'),
@@ -160,7 +160,7 @@ class App extends Component {
 						</div>
 					)}
 				</Router>
-				{/* <ReactQueryDevtools /> */}
+				<ReactQueryDevtools />
 			</QueryClientProvider>
 		);
 	}
