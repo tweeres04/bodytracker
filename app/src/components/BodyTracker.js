@@ -94,6 +94,7 @@ function BodyTrackerField({ label, name, value, handleChange, placeholder }) {
 				<input
 					type="number"
 					className="input"
+					min={0}
 					name={name}
 					placeholder={placeholder}
 					value={value}
@@ -175,7 +176,13 @@ export default function BodyTracker() {
 		},
 		{
 			onSuccess: (newDoc) => {
-				queryClient.setQueryData('entries', (entries) => [newDoc, ...entries]);
+				const queryData = queryClient.getQueryData('entries');
+				if (queryData) {
+					queryClient.setQueryData('entries', (entries) => [
+						newDoc,
+						...entries,
+					]);
+				}
 			},
 		}
 	);
@@ -186,6 +193,8 @@ export default function BodyTracker() {
 			'is-loading': isSubmitting,
 		}
 	);
+
+	const canSubmit = weight || waist || chest || hips || bf;
 
 	return (
 		<section className="section">
@@ -246,7 +255,7 @@ export default function BodyTracker() {
 				<div className="columns">
 					<div className="column">
 						<button
-							disabled={isSubmitting}
+							disabled={isSubmitting || !canSubmit}
 							className={submitButtonClasses}
 							onClick={handleSubmit}
 						>
