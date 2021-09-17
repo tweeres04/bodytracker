@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import isWithinInterval from 'date-fns/isWithinInterval';
 import endOfDay from 'date-fns/endOfDay';
@@ -27,9 +27,33 @@ const backgroundColours = [
 
 const minDate = new Date(1900, 0);
 
-export default function Progress() {
-	const [{ start, end }, setDateRange] = useState({ start: null, end: null });
+function useDateRange() {
+	const [{ start, end }, setDateRange] = useState(() => {
+		const { start, end } =
+			JSON.parse(localStorage.getItem('chartControlsState')) || {};
 
+		return {
+			start: start && new Date(start),
+			end: end && new Date(end),
+		};
+	});
+
+	function resetDateRange() {
+		setDateRange({
+			start: null,
+			end: null,
+		});
+	}
+
+	useEffect(() => {
+		localStorage.setItem('chartControlsState', JSON.stringify({ start, end }));
+	}, [start, end]);
+
+	return { start, end, setDateRange, resetDateRange };
+}
+
+export default function Progress() {
+	const { start, end, setDateRange, resetDateRange } = useDateRange();
 	let { data: entries = [], isLoading } = useEntries();
 
 	entries = _orderBy(entries, 'timestamp');
@@ -153,7 +177,12 @@ export default function Progress() {
 		<section className="section">
 			<div className="container">
 				<h1 className="title">Progress</h1>
-				<ChartControls onDateRangeChange={setDateRange} />
+				<ChartControls
+					setDateRange={setDateRange}
+					resetDateRange={resetDateRange}
+					start={start}
+					end={end}
+				/>
 				<div className="columns" key="all">
 					<div className="column">
 						<Chart

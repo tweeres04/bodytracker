@@ -1,11 +1,11 @@
-import React, { Component, Fragment } from 'react';
+import React, { Fragment } from 'react';
 import Flatpickr from 'react-flatpickr';
 
 const datepickerCommonProps = {
 	className: 'input',
 	options: {
-		maxDate: 'today'
-	}
+		maxDate: 'today',
+	},
 };
 
 function MobileLabel({ label }) {
@@ -60,80 +60,53 @@ function ResetButton({ start, end, resetDateRange }) {
 	);
 }
 
-export default class ChartControls extends Component {
-	state = {
-		start: null,
-		end: null
-	};
-	componentDidMount() {
-		const { onDateRangeChange } = this.props;
-		const { start, end } =
-			JSON.parse(localStorage.getItem('chartControlsState')) || {};
+export default function ChartControls({
+	setDateRange,
+	start,
+	end,
+	resetDateRange,
+}) {
+	function handleDateChange(value, field) {
+		setDateRange((prevDateRange) => ({
+			...prevDateRange,
+			[field]: value,
+		}));
+	}
 
-		const newState = {
-			start: start && new Date(start),
-			end: end && new Date(end)
-		};
-		this.setState(newState);
-		onDateRangeChange(newState);
-	}
-	componentDidUpdate() {
-		const { start, end } = this.state;
-		localStorage.setItem('chartControlsState', JSON.stringify({ start, end }));
-	}
-	render() {
-		const { start, end } = this.state;
-		return (
-			<Fragment>
-				<div className="field is-grouped is-hidden-mobile">
-					<StartDatepicker onDateChange={this.onDateChange} start={start} />
-					<EndDatepicker onDateChange={this.onDateChange} end={end} />
-					<ResetButton
-						start={start}
-						end={end}
-						resetDateRange={this.resetDateRange}
-					/>
-				</div>
-				<div className="is-hidden-tablet">
-					<div className="columns">
-						<div className="column">
-							<div className="field">
-								<StartDatepicker
-									onDateChange={this.onDateChange}
-									start={start}
-									mobile={true}
-								/>
-							</div>
-							<div className="field">
-								<EndDatepicker
-									onDateChange={this.onDateChange}
-									end={end}
-									mobile={true}
-								/>
-							</div>
-							<div className="field">
-								<ResetButton
-									start={start}
-									end={end}
-									resetDateRange={this.resetDateRange}
-								/>
-							</div>
+	return (
+		<Fragment>
+			<div className="field is-grouped is-hidden-mobile">
+				<StartDatepicker onDateChange={handleDateChange} start={start} />
+				<EndDatepicker onDateChange={handleDateChange} end={end} />
+				<ResetButton start={start} end={end} resetDateRange={resetDateRange} />
+			</div>
+			<div className="is-hidden-tablet">
+				<div className="columns">
+					<div className="column">
+						<div className="field">
+							<StartDatepicker
+								onDateChange={handleDateChange}
+								start={start}
+								mobile={true}
+							/>
+						</div>
+						<div className="field">
+							<EndDatepicker
+								onDateChange={handleDateChange}
+								end={end}
+								mobile={true}
+							/>
+						</div>
+						<div className="field">
+							<ResetButton
+								start={start}
+								end={end}
+								resetDateRange={resetDateRange}
+							/>
 						</div>
 					</div>
 				</div>
-			</Fragment>
-		);
-	}
-	onDateChange = (value, field) => {
-		const { onDateRangeChange } = this.props;
-		const statePatch = { [field]: value };
-		this.setState(statePatch);
-		onDateRangeChange(statePatch);
-	};
-	resetDateRange = () => {
-		const { onDateRangeChange } = this.props;
-		const statePatch = { start: null, end: null };
-		this.setState(statePatch);
-		onDateRangeChange(statePatch);
-	};
+			</div>
+		</Fragment>
+	);
 }
