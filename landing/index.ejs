@@ -119,7 +119,6 @@
 				document
 					.getElementById('hero-cta')
 					.addEventListener('click', function (e) {
-						e.preventDefault();
 						gtag('event', 'clicked_cta', {
 							event_callback: function () {
 								document.location = e.target.href;
