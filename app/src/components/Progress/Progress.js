@@ -192,26 +192,28 @@ export default function Progress() {
 						/>
 					</div>
 				</div>
-				{datasets.map((d) => (
-					<div className="columns" key={d.label}>
-						<div className="column">
-							<h2 className="title is-5">{d.label}</h2>
-							<Chart
-								times={times}
-								datasets={
-									d.label === 'Weight'
-										? [d, weightMovingAverageDataset]
-										: d.label === 'Waist'
-										? [d, waistMovingAverageDataset]
-										: [d]
-								}
-								yAxes={[
-									d.label == 'Weight' ? yAxes.weightAxis : yAxes.otherAxis,
-								]}
-							/>
+				{datasets.map((d) =>
+					d.data.some((d) => d) ? (
+						<div className="columns" key={d.label}>
+							<div className="column">
+								<h2 className="title is-5">{d.label}</h2>
+								<Chart
+									times={times}
+									datasets={
+										d.label === 'Weight'
+											? [d, weightMovingAverageDataset]
+											: d.label === 'Waist'
+											? [d, waistMovingAverageDataset]
+											: [d]
+									}
+									yAxes={[
+										d.label == 'Weight' ? yAxes.weightAxis : yAxes.otherAxis,
+									]}
+								/>
+							</div>
 						</div>
-					</div>
-				))}
+					) : null
+				)}
 			</div>
 		</section>
 	);
