@@ -189,7 +189,6 @@ function useCustomDates() {
 			const data = userSnapshot.data();
 			const { dates = [] } = data;
 			setCustomDates(dates);
-			setLoading(false);
 		}
 
 		getDates();
