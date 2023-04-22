@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import classnames from 'classnames';
+import firebase from 'firebase/app';
 
 import dateAddDays from 'date-fns/addDays';
 import dateClosestIndexTo from 'date-fns/closestIndexTo';
@@ -7,6 +8,7 @@ import dateIsAfter from 'date-fns/isAfter';
 import startOfDay from 'date-fns/startOfDay';
 import formatDistance from 'date-fns/formatDistance';
 import format from 'date-fns/format';
+import parse from 'date-fns/parse';
 
 import _round from 'lodash/round';
 
@@ -73,9 +75,12 @@ function StatisticRange({ label, latestEntry, firstEntry }) {
 	);
 }
 
-function StatisticsRange({ title, entries, days }) {
+function StatisticsRange({ title, entries, days, date }) {
 	const today = new Date();
-	const beginningOfTimeframe = startOfDay(dateAddDays(today, -days));
+	const beginningOfTimeframe = days
+		? startOfDay(dateAddDays(today, -days))
+		: parse(date, 'yyyy-MM-dd', today);
+
 	const latestEntry = entries[0];
 	const entriesInTimeframe = entries.filter((e) =>
 		dateIsAfter(e.timestamp.toDate(), beginningOfTimeframe)
@@ -120,8 +125,83 @@ function StatisticsRange({ title, entries, days }) {
 	) : null;
 }
 
+function useAddDateModal() {
+	const [showAddDateModal, setShowAddDateModal] = useState(false);
+
+	function toggleAddDateModal() {
+		setShowAddDateModal(!showAddDateModal);
+	}
+
+	function addNewDate() {
+		const { uid } = firebase.auth().currentUser;
+		const value = document.getElementById('newDate').value;
+		firebase
+			.firestore()
+			.doc(`users/${uid}`)
+			.set({
+				dates: firebase.firestore.FieldValue.arrayUnion(value),
+			});
+		toggleAddDateModal();
+	}
+
+	function AddDateModal() {
+		return showAddDateModal ? (
+			<div className="modal is-active">
+				<div className="modal-background"></div>
+				<div className="modal-card">
+					<header className="modal-card-head">
+						<p className="modal-card-title">Add date</p>
+						<button className="delete" aria-label="close"></button>
+					</header>
+					<div className="modal-card-body">
+						<div className="field">
+							<label htmlFor="newDate" className="label">
+								New Date
+							</label>
+							<input type="date" className="input" id="newDate" />
+						</div>
+					</div>
+					<footer className="modal-card-foot">
+						<button className="button is-success" onClick={addNewDate}>
+							Save changes
+						</button>
+						<button className="button">Cancel</button>
+					</footer>
+				</div>
+			</div>
+		) : null;
+	}
+
+	return { AddDateModal, toggleAddDateModal };
+}
+
+function useCustomDates() {
+	const [customDates, setCustomDates] = useState();
+
+	useEffect(() => {
+		async function getDates() {
+			const { uid } = firebase.auth().currentUser;
+
+			const userSnapshot = await firebase
+				.firestore()
+				.doc(`/users/${uid}`)
+				.get();
+			const data = userSnapshot.data();
+			const { dates = [] } = data;
+			setCustomDates(dates);
+			setLoading(false);
+		}
+
+		getDates();
+	}, []);
+
+	return { customDates };
+}
+
 export default function Stats() {
 	const { data: entries = [], isLoading } = useEntries();
+	const { toggleAddDateModal, AddDateModal } = useAddDateModal();
+	const { customDates } = useCustomDates();
 
 	const firstDate = isLoading
 		? null
@@ -134,7 +214,16 @@ export default function Stats() {
 	) : (
 		<section className="section">
 			<div className="container">
-				<h1 className="title">Stats</h1>
+				<div className="columns">
+					<div className="column">
+						<h1 className="title">Stats</h1>
+					</div>
+					<div className="column is-narrow">
+						<button className="button is-primary" onClick={toggleAddDateModal}>
+							Add date
+						</button>
+					</div>
+				</div>
 				{entries && entries.length < 1 ? (
 					<div className="box">No entries yet. Add one to get started.</div>
 				) : (
@@ -149,6 +238,15 @@ export default function Stats() {
 							<Statistic label="Hips">{latestEntry.hips}</Statistic>
 							<Statistic label="Bodyfat Percentage">{latestEntry.bf}</Statistic>
 						</StatisticsCard>
+						{customDates
+							? customDates.map((cd) => (
+									<StatisticsRange
+										title={`Since ${cd}`}
+										entries={entries}
+										date={cd}
+									/>
+							  ))
+							: null}
 						<StatisticsRange title="Past Week" entries={entries} days={7} />
 						<StatisticsRange title="Past Month" entries={entries} days={30} />
 						<StatisticsRange
@@ -169,6 +267,7 @@ export default function Stats() {
 						/>
 					</>
 				)}
+				<AddDateModal />
 			</div>
 		</section>
 	);
