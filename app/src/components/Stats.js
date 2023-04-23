@@ -156,7 +156,11 @@ function useAddDateModal() {
 				<div className="modal-card">
 					<header className="modal-card-head">
 						<p className="modal-card-title">Add date</p>
-						<button className="delete" aria-label="close"></button>
+						<button
+							className="delete"
+							aria-label="close"
+							onClick={toggleAddDateModal}
+						></button>
 					</header>
 					<div className="modal-card-body">
 						<div className="field">
@@ -170,7 +174,9 @@ function useAddDateModal() {
 						<button className="button is-success" onClick={addNewDate}>
 							Save changes
 						</button>
-						<button className="button">Cancel</button>
+						<button className="button" onClick={toggleAddDateModal}>
+							Cancel
+						</button>
 					</footer>
 				</div>
 			</div>
