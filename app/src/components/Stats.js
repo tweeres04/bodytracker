@@ -91,7 +91,12 @@ function StatisticsRange({ title, entries, days, date }) {
 	);
 	const firstEntry = entries[index];
 
-	const subtitle = `(Since ${formatDate(firstEntry.timestamp.toDate())})`;
+	title ||= `Since ${formatDate(
+		date ? beginningOfTimeframe : firstEntry.timestamp.toDate()
+	)}`;
+	const subtitle = date
+		? null
+		: `(Since ${formatDate(firstEntry.timestamp.toDate())})`;
 
 	return entriesInTimeframe.length > 0 ? (
 		<StatisticsCard title={title} subtitle={subtitle}>
@@ -239,11 +244,7 @@ export default function Stats() {
 						</StatisticsCard>
 						{customDates
 							? customDates.map((cd) => (
-									<StatisticsRange
-										title={`Since ${cd}`}
-										entries={entries}
-										date={cd}
-									/>
+									<StatisticsRange entries={entries} date={cd} />
 							  ))
 							: null}
 						<StatisticsRange title="Past Week" entries={entries} days={7} />
