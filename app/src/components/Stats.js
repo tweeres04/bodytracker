@@ -143,7 +143,7 @@ function useAddDateModal() {
 		firebase
 			.firestore()
 			.doc(`users/${uid}`)
-			.set({
+			.update({
 				dates: firebase.firestore.FieldValue.arrayUnion(value),
 			});
 		toggleAddDateModal();
