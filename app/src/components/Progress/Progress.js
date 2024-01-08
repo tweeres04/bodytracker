@@ -73,6 +73,7 @@ export default function Progress() {
 	const times = entries.map((e) => new Date(e.timestamp.toDate()));
 	const weight = entries.map((e) => e.weight);
 	const waist = entries.map((e) => e.waist);
+	const weightToWaist = entries.map((e) => e.weight / e.waist);
 	const chest = entries.map((e) => e.chest);
 	const hips = entries.map((e) => e.hips);
 	const bf = entries.map((e) => e.bf);
@@ -114,6 +115,23 @@ export default function Progress() {
 		spanGaps: true,
 	};
 
+	const weightToWaistMovingAverageRemainder =
+		(waist.length - 1) % movingAverageSampleInterval;
+	const weightToWaistMovingAverageDataset = {
+		label: `Weight to waist (${movingAverageInterval} Entry Average)`,
+		data: weightToWaist.map((w, i) =>
+			i < movingAverageInterval ||
+			i % movingAverageSampleInterval !== weightToWaistMovingAverageRemainder
+				? null
+				: _range(i - movingAverageInterval + 1, i + 1).reduce(
+						(sum, i) => sum + waist[i],
+						0
+				  ) / movingAverageInterval
+		),
+		yAxisID: 'other-axis',
+		spanGaps: true,
+	};
+
 	const datasets = [
 		{
 			label: 'Weight',
@@ -134,8 +152,8 @@ export default function Progress() {
 			spanGaps: true,
 		},
 		{
-			label: 'Chest',
-			data: chest,
+			label: 'Weight to waist ratio',
+			data: weightToWaist,
 			borderColor: colours[2],
 			backgroundColor: backgroundColours[2],
 			yAxisID: 'other-axis',
@@ -143,8 +161,8 @@ export default function Progress() {
 			spanGaps: true,
 		},
 		{
-			label: 'Hips',
-			data: hips,
+			label: 'Chest',
+			data: chest,
 			borderColor: colours[3],
 			backgroundColor: backgroundColours[3],
 			yAxisID: 'other-axis',
@@ -152,10 +170,19 @@ export default function Progress() {
 			spanGaps: true,
 		},
 		{
-			label: 'Bodyfat %',
-			data: bf,
+			label: 'Hips',
+			data: hips,
 			borderColor: colours[0],
 			backgroundColor: backgroundColours[0],
+			yAxisID: 'other-axis',
+			lineTension: 0,
+			spanGaps: true,
+		},
+		{
+			label: 'Bodyfat %',
+			data: bf,
+			borderColor: colours[1],
+			backgroundColor: backgroundColours[1],
 			yAxisID: 'other-axis',
 			lineTension: 0,
 			spanGaps: true,
@@ -187,7 +214,9 @@ export default function Progress() {
 					<div className="column">
 						<Chart
 							times={times}
-							datasets={datasets}
+							datasets={datasets.filter(
+								(d) => d.label !== 'Weight to waist ratio'
+							)}
 							yAxes={[yAxes.weightAxis, yAxes.otherAxis]}
 						/>
 					</div>
@@ -204,6 +233,8 @@ export default function Progress() {
 											? [d, weightMovingAverageDataset]
 											: d.label === 'Waist'
 											? [d, waistMovingAverageDataset]
+											: d.label === ''
+											? [d, weightToWaistMovingAverageDataset]
 											: [d]
 									}
 									yAxes={[
