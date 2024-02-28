@@ -7,6 +7,7 @@ import dateClosestIndexTo from 'date-fns/closestIndexTo';
 import dateIsAfter from 'date-fns/isAfter';
 import startOfDay from 'date-fns/startOfDay';
 import formatDistance from 'date-fns/formatDistance';
+import differenceInWeeks from 'date-fns/differenceInWeeks';
 import format from 'date-fns/format';
 import parse from 'date-fns/parse';
 
@@ -26,6 +27,7 @@ function formatDateAndTime(date) {
 function Statistic({
 	label,
 	percentage = null,
+	perWeek = null,
 	successStyle = false,
 	children,
 }) {
@@ -35,11 +37,15 @@ function Statistic({
 	const tagClasses = classnames('tag is-rounded', {
 		'is-success': successStyle,
 	});
+	const perWeekClasses = classnames('is-size-7', {
+		'has-text-success': successStyle,
+	});
 
 	return children !== undefined ? (
 		<div className="column has-text-centered">
 			<div className="heading has-text-grey-light">{label}</div>
 			<div className={valueClasses}>{children}</div>
+			{perWeek !== null && <div className={perWeekClasses}>{perWeek}/week</div>}
 			{percentage !== null && <div className={tagClasses}>{percentage}%</div>}
 		</div>
 	) : null;
@@ -57,10 +63,13 @@ function StatisticsCard({ title, subtitle, children }) {
 	);
 }
 
-function StatisticRange({ label, latestEntry, firstEntry }) {
+function StatisticRange({ label, latestEntry, firstEntry, weeksInTimeframe }) {
 	const value = firstEntry ? _round(latestEntry - firstEntry, 2) : latestEntry;
 	const displayValue = firstEntry && value > 0 ? `+${value}` : value;
 	const percentage = firstEntry ? _round((value / firstEntry) * 100, 2) : null;
+
+	const displayValuePerWeek =
+		weeksInTimeframe && value ? _round(value / weeksInTimeframe, 2) : null;
 
 	const successStyle = firstEntry && value < 0;
 
@@ -68,6 +77,7 @@ function StatisticRange({ label, latestEntry, firstEntry }) {
 		<Statistic
 			label={label}
 			percentage={percentage}
+			perWeek={displayValuePerWeek}
 			successStyle={successStyle}
 		>
 			{displayValue}
@@ -98,6 +108,8 @@ function StatisticsRange({ title, entries, days, date }) {
 		? null
 		: `(Since ${formatDate(firstEntry.timestamp.toDate())})`;
 
+	const weeksInTimeframe = differenceInWeeks(new Date(), beginningOfTimeframe);
+
 	return entriesInTimeframe.length > 0 ? (
 		<StatisticsCard title={title} subtitle={subtitle}>
 			<StatisticRange label="Entries" latestEntry={entriesInTimeframe.length} />
@@ -105,26 +117,31 @@ function StatisticsRange({ title, entries, days, date }) {
 				label="Weight"
 				latestEntry={latestEntry.weight}
 				firstEntry={firstEntry.weight}
+				weeksInTimeframe={weeksInTimeframe}
 			/>
 			<StatisticRange
 				label="Waist"
 				latestEntry={latestEntry.waist}
 				firstEntry={firstEntry.waist}
+				weeksInTimeframe={weeksInTimeframe}
 			/>
 			<StatisticRange
 				label="Chest"
 				latestEntry={latestEntry.chest}
 				firstEntry={firstEntry.chest}
+				weeksInTimeframe={weeksInTimeframe}
 			/>
 			<StatisticRange
 				label="Hips"
 				latestEntry={latestEntry.hips}
 				firstEntry={firstEntry.hips}
+				weeksInTimeframe={weeksInTimeframe}
 			/>
 			<StatisticRange
 				label="Bodyfat Percentage"
 				latestEntry={latestEntry.bf}
 				firstEntry={firstEntry.bf}
+				weeksInTimeframe={weeksInTimeframe}
 			/>
 		</StatisticsCard>
 	) : null;
