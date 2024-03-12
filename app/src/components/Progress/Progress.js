@@ -27,6 +27,15 @@ const backgroundColours = [
 
 const minDate = new Date(1900, 0);
 
+/**
+ * For when there's a gap in a dataset, finds the most recently entered value
+ * @param {number[]} values
+ * @returns number
+ */
+function findPrevValue(values) {
+	return values[values.length - 1] ?? findPrevValue(values.slice(0, -1));
+}
+
 function useDateRange() {
 	const [{ start, end }, setDateRange] = useState(() => {
 		const { start, end } =
@@ -73,7 +82,13 @@ export default function Progress() {
 	const times = entries.map((e) => new Date(e.timestamp.toDate()));
 	const weight = entries.map((e) => e.weight);
 	const waist = entries.map((e) => e.waist);
-	const weightToWaist = entries.map((e) => e.weight / e.waist);
+	const weightToWaist = entries.map(
+		(e, i) =>
+			(e.weight ??
+				findPrevValue(entries.map((e) => e.weight).slice(entries.length - 1))) /
+			(e.waist ??
+				findPrevValue(entries.map((e) => e.waist).slice(entries.length - 1)))
+	);
 	const chest = entries.map((e) => e.chest);
 	const hips = entries.map((e) => e.hips);
 	const bf = entries.map((e) => e.bf);
@@ -90,7 +105,7 @@ export default function Progress() {
 			i % movingAverageSampleInterval !== weightMovingAverageRemainder
 				? null
 				: _range(i - movingAverageInterval + 1, i + 1).reduce(
-						(sum, i) => sum + weight[i],
+						(sum, i) => sum + (weight[i] ?? findPrevValue(weight.slice(0, i))),
 						0
 				  ) / movingAverageInterval
 		),
@@ -107,7 +122,7 @@ export default function Progress() {
 			i % movingAverageSampleInterval !== waistMovingAverageRemainder
 				? null
 				: _range(i - movingAverageInterval + 1, i + 1).reduce(
-						(sum, i) => sum + waist[i],
+						(sum, i) => sum + (waist[i] ?? findPrevValue(waist.slice(0, i))),
 						0
 				  ) / movingAverageInterval
 		),
@@ -124,7 +139,9 @@ export default function Progress() {
 			i % movingAverageSampleInterval !== weightToWaistMovingAverageRemainder
 				? null
 				: _range(i - movingAverageInterval + 1, i + 1).reduce(
-						(sum, i) => sum + waist[i],
+						(sum, i) =>
+							sum +
+							(weightToWaist[i] ?? findPrevValue(weightToWaist.slice(0, i))),
 						0
 				  ) / movingAverageInterval
 		),
@@ -233,7 +250,7 @@ export default function Progress() {
 											? [d, weightMovingAverageDataset]
 											: d.label === 'Waist'
 											? [d, waistMovingAverageDataset]
-											: d.label === ''
+											: d.label === 'Weight to waist ratio'
 											? [d, weightToWaistMovingAverageDataset]
 											: [d]
 									}
