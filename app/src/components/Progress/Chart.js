@@ -28,28 +28,35 @@ export default class Chart extends Component {
 			type: 'line',
 			data: {
 				labels: times,
-				datasets
+				datasets,
 			},
 			options: {
 				scales: {
 					xAxes: [
 						{
-							type: 'time'
-						}
+							type: 'time',
+						},
 					],
-					yAxes
+					yAxes,
 				},
-				animation: null
-			}
+				animation: null,
+				maintainAspectRatio: false,
+			},
 		});
 	};
 	render() {
 		return (
-			<canvas
-				ref={e => {
-					this.element = e;
+			<div
+				style={{
+					height: '95dvh',
 				}}
-			/>
+			>
+				<canvas
+					ref={(e) => {
+						this.element = e;
+					}}
+				/>
+			</div>
 		);
 	}
 }
