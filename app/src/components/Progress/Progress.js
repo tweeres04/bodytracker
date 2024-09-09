@@ -156,8 +156,6 @@ export default function Progress() {
 			borderColor: colours[0],
 			backgroundColor: backgroundColours[0],
 			yAxisID: 'weight-axis',
-			lineTension: 0,
-			spanGaps: true,
 		},
 		{
 			label: 'Waist',
@@ -165,8 +163,6 @@ export default function Progress() {
 			borderColor: colours[1],
 			backgroundColor: backgroundColours[1],
 			yAxisID: 'other-axis',
-			lineTension: 0,
-			spanGaps: true,
 		},
 		{
 			label: 'Weight to waist ratio',
@@ -174,8 +170,6 @@ export default function Progress() {
 			borderColor: colours[2],
 			backgroundColor: backgroundColours[2],
 			yAxisID: 'other-axis',
-			lineTension: 0,
-			spanGaps: true,
 		},
 		{
 			label: 'Chest',
@@ -183,8 +177,6 @@ export default function Progress() {
 			borderColor: colours[3],
 			backgroundColor: backgroundColours[3],
 			yAxisID: 'other-axis',
-			lineTension: 0,
-			spanGaps: true,
 		},
 		{
 			label: 'Hips',
@@ -192,8 +184,6 @@ export default function Progress() {
 			borderColor: colours[0],
 			backgroundColor: backgroundColours[0],
 			yAxisID: 'other-axis',
-			lineTension: 0,
-			spanGaps: true,
 		},
 		{
 			label: 'Bodyfat %',
@@ -201,8 +191,6 @@ export default function Progress() {
 			borderColor: colours[1],
 			backgroundColor: backgroundColours[1],
 			yAxisID: 'other-axis',
-			lineTension: 0,
-			spanGaps: true,
 		},
 	];
 

@@ -24,6 +24,14 @@ export default class Chart extends Component {
 			this.chart.destroy();
 		}
 
+		datasets.forEach((ds) => {
+			ds.pointBorderColor = '#00000000';
+			ds.pointBackgroundColor = '#00000000';
+			ds.pointHitRadius = 50;
+			ds.lineTension = 0.4;
+			ds.spanGaps = true;
+		});
+
 		this.chart = new Chartjs(this.element, {
 			type: 'line',
 			data: {
