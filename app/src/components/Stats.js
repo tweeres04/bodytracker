@@ -271,6 +271,7 @@ export default function Stats() {
 							  ))
 							: null}
 						<StatisticsRange title="Past Week" entries={entries} days={7} />
+						<StatisticsRange title="Past 2 Weeks" entries={entries} days={14} />
 						<StatisticsRange title="Past Month" entries={entries} days={30} />
 						<StatisticsRange
 							title="Past 3 Months"
