@@ -93,16 +93,60 @@ export default function Progress() {
 	const hips = entries.map((e) => e.hips);
 	const bf = entries.map((e) => e.bf);
 
-	const movingAverageInterval = Math.round(entries.length / 5);
-	const movingAverageSampleInterval = Math.round(Math.log2(entries.length)); // Plot one of every n entries to smooth the line
+	const movingAverageInterval = Math.round(entries.length * 0.1);
+
+	const weightTrendline = {
+		label: 'Weight trendline',
+		data: weight.map((w, i) =>
+			i === 0 || i === weight.length - 1
+				? weight
+						.slice(
+							i === 0 ? 0 : weight.length - 1 - movingAverageInterval,
+							i === 0 ? movingAverageInterval : weight.length - 1
+						)
+						.reduce((sum, w) => sum + w, 0) / movingAverageInterval
+				: null
+		),
+		yAxisID: 'weight-axis',
+	};
+
+	const waistTrendline = {
+		label: 'Waist trendline',
+		data: waist.map((w, i) =>
+			i === 0 || i === waist.length - 1
+				? waist
+						.slice(
+							i === 0 ? 0 : waist.length - 1 - movingAverageInterval,
+							i === 0 ? movingAverageInterval : waist.length - 1
+						)
+						.reduce((sum, w) => sum + w, 0) / movingAverageInterval
+				: null
+		),
+		yAxisID: 'other-axis',
+	};
+
+	const weightToWaistTrendline = {
+		label: 'Weight to waist trendline',
+		data: weightToWaist.map((w, i) =>
+			i === 0 || i === weightToWaist.length - 1
+				? weightToWaist
+						.slice(
+							i === 0 ? 0 : weightToWaist.length - 1 - movingAverageInterval,
+							i === 0 ? movingAverageInterval : weightToWaist.length - 1
+						)
+						.reduce((sum, w) => sum + w, 0) / movingAverageInterval
+				: null
+		),
+		yAxisID: 'other-axis',
+	};
 
 	const weightMovingAverageRemainder =
-		(weight.length - 1) % movingAverageSampleInterval;
+		(weight.length - 1) % movingAverageInterval;
 	const weightMovingAverageDataset = {
 		label: `Weight (${movingAverageInterval} Entry Average)`,
 		data: weight.map((w, i) =>
 			i < movingAverageInterval ||
-			i % movingAverageSampleInterval !== weightMovingAverageRemainder
+			i % movingAverageInterval !== weightMovingAverageRemainder
 				? null
 				: _range(i - movingAverageInterval + 1, i + 1).reduce(
 						(sum, i) => sum + (weight[i] ?? findPrevValue(weight.slice(0, i))),
@@ -110,16 +154,15 @@ export default function Progress() {
 				  ) / movingAverageInterval
 		),
 		yAxisID: 'weight-axis',
-		spanGaps: true,
 	};
 
 	const waistMovingAverageRemainder =
-		(waist.length - 1) % movingAverageSampleInterval;
+		(waist.length - 1) % movingAverageInterval;
 	const waistMovingAverageDataset = {
 		label: `Waist (${movingAverageInterval} Entry Average)`,
 		data: waist.map((w, i) =>
 			i < movingAverageInterval ||
-			i % movingAverageSampleInterval !== waistMovingAverageRemainder
+			i % movingAverageInterval !== waistMovingAverageRemainder
 				? null
 				: _range(i - movingAverageInterval + 1, i + 1).reduce(
 						(sum, i) => sum + (waist[i] ?? findPrevValue(waist.slice(0, i))),
@@ -127,16 +170,15 @@ export default function Progress() {
 				  ) / movingAverageInterval
 		),
 		yAxisID: 'other-axis',
-		spanGaps: true,
 	};
 
 	const weightToWaistMovingAverageRemainder =
-		(waist.length - 1) % movingAverageSampleInterval;
+		(waist.length - 1) % movingAverageInterval;
 	const weightToWaistMovingAverageDataset = {
 		label: `Weight to waist (${movingAverageInterval} Entry Average)`,
 		data: weightToWaist.map((w, i) =>
 			i < movingAverageInterval ||
-			i % movingAverageSampleInterval !== weightToWaistMovingAverageRemainder
+			i % movingAverageInterval !== weightToWaistMovingAverageRemainder
 				? null
 				: _range(i - movingAverageInterval + 1, i + 1).reduce(
 						(sum, i) =>
@@ -146,7 +188,6 @@ export default function Progress() {
 				  ) / movingAverageInterval
 		),
 		yAxisID: 'other-axis',
-		spanGaps: true,
 	};
 
 	const datasets = [
@@ -235,11 +276,15 @@ export default function Progress() {
 									times={times}
 									datasets={
 										d.label === 'Weight'
-											? [d, weightMovingAverageDataset]
+											? [d, weightTrendline, weightMovingAverageDataset]
 											: d.label === 'Waist'
-											? [d, waistMovingAverageDataset]
+											? [d, waistTrendline, waistMovingAverageDataset]
 											: d.label === 'Weight to waist ratio'
-											? [d, weightToWaistMovingAverageDataset]
+											? [
+													d,
+													weightToWaistTrendline,
+													weightToWaistMovingAverageDataset,
+											  ]
 											: [d]
 									}
 									yAxes={[

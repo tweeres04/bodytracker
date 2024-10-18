@@ -28,8 +28,25 @@ export default class Chart extends Component {
 			ds.pointBorderColor = '#00000000';
 			ds.pointBackgroundColor = '#00000000';
 			ds.pointHitRadius = 50;
-			ds.lineTension = 0.4;
+			ds.borderCapStyle = 'square';
 			ds.spanGaps = true;
+
+			if (!ds.label.includes('trendline') && !ds.label.includes('Average')) {
+				ds.lineTension = 0;
+			}
+			if (ds.label.includes('trendline')) {
+				ds.backgroundColor = '#00000000';
+				ds.borderColor = 'rgba(100,100,100,0.2)';
+			}
+			if (ds.label.includes('Average')) {
+				const newBorderColor = datasets[0].borderColor
+					.replace('rgb', 'rgba')
+					.replace(')', ',0.2)');
+				ds.borderColor = newBorderColor;
+
+				const newBackgroundColor = datasets[0].backgroundColor;
+				ds.backgroundColor = newBackgroundColor;
+			}
 		});
 
 		this.chart = new Chartjs(this.element, {
