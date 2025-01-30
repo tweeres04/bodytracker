@@ -53,7 +53,7 @@ class App extends Component {
 	componentDidMount() {
 		firebase.auth().onAuthStateChanged((user) => {
 			this.setState({ user });
-			amplitude.getInstance().setUserId(user.uid);
+			amplitude.getInstance().setUserId(user && user.uid);
 		});
 
 		Stats.preload();

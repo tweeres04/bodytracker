@@ -17,7 +17,6 @@ export default function Signin() {
 								uiConfig={{
 									autoUpgradeAnonymousUsers: true,
 									signInOptions: [
-										firebase.auth.FacebookAuthProvider.PROVIDER_ID,
 										{
 											provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
 											requireDisplayName: false,
