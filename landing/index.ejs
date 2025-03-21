@@ -1,5 +1,11 @@
 <!DOCTYPE html>
-<% const isProduction = process.env.NODE_ENV === 'production'; %>
+<%
+const isProduction = process.env.NODE_ENV === 'production';
+const title = 'Weight loss tracker - Bodytracker';
+const description = 'The weight loss tracker that gives you helpful stats and visualizations to motivate and help you along the way. Take full control of your body goals. Made in Canada.';
+const url = "https://www.bodytracker.ca";
+const image = 'https://bodytracker.ca/assets/share.png';
+%>
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
@@ -8,41 +14,35 @@
 		<link rel="shortcut icon" href="/assets/measuring-tape.png" />
 
 		<!-- HTML Meta Tags -->
-		<title>Body tracker - The helpful weight loss tracker</title>
+		<title><%= title %></title>
 		<meta
 			name="description"
-			content="The weight and measurement logging app that gives you helpful screens, stats and visualizations to help you along the way. Take full control of your body goals."
+			content="<%= description %>"
 		/>
 		<!-- Facebook Meta Tags -->
-		<meta property="og:url" content="https://www.bodytracker.ca" />
+		<meta property="og:url" content="<%= url %>" />
 		<meta property="og:type" content="website" />
-		<meta
-			property="og:title"
-			content="Body tracker - The helpful weight loss tracker"
-		/>
+		<meta property="og:title" content="<%= title %>" />
 		<meta
 			property="og:description"
-			content="The weight and measurement logging app that gives you helpful screens, stats and visualizations to help you along the way. Take full control of your body goals."
+			content="<%= description %>"
 		/>
 		<meta
 			property="og:image"
-			content="https://bodytracker.ca/assets/share.png"
+			content="<%= image %>"
 		/>
 		<!-- Twitter Meta Tags -->
 		<meta name="twitter:card" content="summary_large_image" />
 		<meta property="twitter:domain" content="bodytracker.ca" />
-		<meta property="twitter:url" content="https://www.bodytracker.ca" />
-		<meta
-			name="twitter:title"
-			content="Body tracker - The helpful weight loss tracker"
-		/>
+		<meta property="twitter:url" content="<%= url %>" />
+		<meta name="twitter:title" content="<%= title %>" />
 		<meta
 			name="twitter:description"
-			content="The weight and measurement logging app that gives you helpful screens, stats and visualizations to help you along the way. Take full control of your body goals."
+			content="<%= description %>"
 		/>
 		<meta
 			name="twitter:image"
-			content="https://bodytracker.ca/assets/share.png"
+			content="<%= image %>"
 		/>
 
 		<link rel="stylesheet" href="css/main.css" />
@@ -72,7 +72,7 @@
 							<h1 class="title">Get control of your weight loss goals.</h1>
 							<h2 class="subtitle">
 								Track with Bodytracker and get helpful stats and visualizations
-								that motivate progress.
+								that motivate progress. Made in Canada 🇨🇦
 							</h2>
 							<a
 								class="button is-primary is-large is-inverted"
